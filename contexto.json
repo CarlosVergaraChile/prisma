@@ -1,0 +1,7 @@
+{
+  "uf_clp": 37500, "dolar_clp": 920, "ipc_anual": 4.2,
+  "tasa_interes": 6.75, "inflacion_salud": 5.8,
+  "precio_cobre_largo": 4.0, "precio_gas_referencia": 6.5,
+  "precio_carbon_referencia": 110, "precio_spot_electrico": 80,
+  "impuesto_verde_usd_ton": 5, "fecha_actualizacion": "2025-05-01"
+}
