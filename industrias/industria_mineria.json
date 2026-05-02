@@ -1,0 +1,96 @@
+{
+  "nombre": "Minería del Cobre (Profundizado)",
+  "supuestos": {
+    "produccionBase": 50000,
+    "recuperacion": 0.85,
+    "leyCabezaBase": 0.7,
+    "factorLibrasPorTon": 2204.62,
+    "gramosPorOnza": 31.1035,
+    "precioAcido": 0.15,
+    "proporcionMolibdeno": 0.0002,
+    "proporcionOro": 0.2,
+    "proporcionPlata": 2,
+    "costoPlantaBase": 8,
+    "factorAgua": 0.45,
+    "factorEnergia": 0.05
+  },
+  "elasticidades": {
+    "precioCobre": 1.3,
+    "ley": -0.7,
+    "costoInsumos": -0.6,
+    "consumoAgua": -0.5,
+    "costoEnergia": -0.4,
+    "precioMolibdeno": 0.3,
+    "precioOro": 0.2,
+    "precioPlata": 0.1,
+    "tcrc": -0.4,
+    "consumoAcido": -0.3,
+    "fletePuerto": -0.3,
+    "depreciacion": -0.2,
+    "leyCorte": -0.5
+  },
+  "incertidumbre": {
+    "precioCobre": { "min": 2.8, "max": 5.5 },
+    "ley": { "min": 0.45, "max": 0.85 },
+    "costoInsumos": { "min": 15, "max": 30 },
+    "consumoAgua": { "min": 0.3, "max": 0.7 },
+    "costoEnergia": { "min": 60, "max": 130 },
+    "precioMolibdeno": { "min": 12, "max": 30 },
+    "precioOro": { "min": 1400, "max": 2200 },
+    "precioPlata": { "min": 16, "max": 32 },
+    "tcrc": { "min": 60, "max": 110 },
+    "consumoAcido": { "min": 2.5, "max": 5 },
+    "fletePuerto": { "min": 12, "max": 28 },
+    "depreciacion": { "min": 40, "max": 80 },
+    "leyCorte": { "min": 0.18, "max": 0.35 }
+  },
+  "nodos": [
+    {"id":"precioCobre","label":"Precio Cobre (USD/lb)","tipo":"driver","unidades":"USD/lb","elasticidad":1.3},
+    {"id":"ley","label":"Ley de Cabeza (%)","tipo":"driver","unidades":"%","elasticidad":-0.7},
+    {"id":"costoInsumos","label":"Costo Insumos Mina (USD/ton)","tipo":"driver","unidades":"USD/ton","elasticidad":-0.6},
+    {"id":"consumoAgua","label":"Consumo Agua (m³/ton)","tipo":"driver","unidades":"m³/ton","elasticidad":-0.5},
+    {"id":"costoEnergia","label":"Costo Energía (USD/MWh)","tipo":"driver","unidades":"USD/MWh","elasticidad":-0.4},
+    {"id":"precioMolibdeno","label":"Precio Molibdeno (USD/lb)","tipo":"driver","unidades":"USD/lb","elasticidad":0.3},
+    {"id":"precioOro","label":"Precio Oro (USD/oz)","tipo":"driver","unidades":"USD/oz","elasticidad":0.2},
+    {"id":"precioPlata","label":"Precio Plata (USD/oz)","tipo":"driver","unidades":"USD/oz","elasticidad":0.1},
+    {"id":"tcrc","label":"TC/RC (USD/ton)","tipo":"driver","unidades":"USD/ton","elasticidad":-0.4},
+    {"id":"consumoAcido","label":"Consumo Ácido (kg/ton)","tipo":"driver","unidades":"kg/ton","elasticidad":-0.3},
+    {"id":"fletePuerto","label":"Flete a Puerto (USD/ton)","tipo":"driver","unidades":"USD/ton","elasticidad":-0.3},
+    {"id":"depreciacion","label":"Depreciación (M USD/año)","tipo":"driver","unidades":"M USD/año","elasticidad":-0.2},
+    {"id":"leyCorte","label":"Ley de Corte (%)","tipo":"driver","unidades":"%","elasticidad":-0.5},
+    {"id":"produccionCobre","label":"Cobre Fino (ton)","tipo":"intermedio","unidades":"ton"},
+    {"id":"ebitda","label":"EBITDA (M USD)","tipo":"resultado","unidades":"M USD"},
+    {"id":"costoC1","label":"Costo C1 (USD/lb)","tipo":"intermedio","unidades":"USD/lb"},
+    {"id":"costoC2","label":"Costo C2 (USD/lb)","tipo":"intermedio","unidades":"USD/lb"},
+    {"id":"margenUnitario","label":"Margen (P-C2)","tipo":"intermedio","unidades":"USD/lb"}
+  ],
+  "arcos": [
+    {"origen":"precioCobre","destino":"ebitda","polaridad":"positivo"},
+    {"origen":"ley","destino":"produccionCobre","polaridad":"positivo"},
+    {"origen":"costoInsumos","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"consumoAgua","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"costoEnergia","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"precioMolibdeno","destino":"ebitda","polaridad":"positivo"},
+    {"origen":"tcrc","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"depreciacion","destino":"costoC2","polaridad":"positivo"}
+  ],
+  "kpis": [
+    {"id":"precioCobre","label":"Precio Cobre","base":4.0,"unidades":"USD/lb","formato":"num"},
+    {"id":"produccionCobre","label":"Cobre Fino","base":50000,"unidades":"ton","formato":"num"},
+    {"id":"ebitda","label":"EBITDA","base":0,"unidades":"M USD","formato":"dinero"},
+    {"id":"costoC1","label":"C1","base":1.80,"unidades":"USD/lb","formato":"num"},
+    {"id":"costoC2","label":"C2","base":2.10,"unidades":"USD/lb","formato":"num"},
+    {"id":"margenUnitario","label":"Margen","base":1.90,"unidades":"USD/lb","formato":"num"}
+  ],
+  "cadenas": [
+    {"nombre":"Caída precio cobre","descripcion":"Menor ingreso → reduce EBITDA → puede activar revisión de ley de corte","impacto":"Alto","polaridad":"negativo"},
+    {"nombre":"Alza de insumos","descripcion":"Mayores costos → C1/C2 suben → comprime márgenes","impacto":"Significativo","polaridad":"negativo"}
+  ],
+  "escenarios": [
+    {"nombre":"Base","palancas":{"precioCobre":4.0, "ley":0.65, "costoInsumos":22, "consumoAgua":0.5, "costoEnergia":90, "precioMolibdeno":20, "precioOro":1850, "precioPlata":24, "tcrc":80, "consumoAcido":3.5, "fletePuerto":18, "depreciacion":60, "leyCorte":0.25}},
+    {"nombre":"Superciclo","palancas":{"precioCobre":5.5, "ley":0.72, "costoInsumos":20, "consumoAgua":0.45, "costoEnergia":75, "precioMolibdeno":25, "precioOro":2000, "precioPlata":28, "tcrc":70, "consumoAcido":3.2, "fletePuerto":16, "depreciacion":58, "leyCorte":0.22}},
+    {"nombre":"Crisis Costos","palancas":{"precioCobre":3.2, "ley":0.58, "costoInsumos":26, "consumoAgua":0.6, "costoEnergia":110, "precioMolibdeno":15, "precioOro":1600, "precioPlata":20, "tcrc":95, "consumoAcido":4.2, "fletePuerto":22, "depreciacion":65, "leyCorte":0.30}}
+  ],
+  "initState": {"precioCobre":4.0, "ley":0.65, "costoInsumos":22, "consumoAgua":0.5, "costoEnergia":90, "precioMolibdeno":20, "precioOro":1850, "precioPlata":24, "tcrc":80, "consumoAcido":3.5, "fletePuerto":18, "depreciacion":60, "leyCorte":0.25},
+  "formulaPrincipal": "function(p, s, ctx) { var prod = s.produccionBase * (p.ley / s.leyCabezaBase); if (p.ley < p.leyCorte) { prod = prod * Math.pow(p.ley / p.leyCorte, 2); } prod = Math.max(1000, prod); var mineral = prod / (p.ley / 100 * s.recuperacion); var ingCu = prod * s.factorLibrasPorTon * p.precioCobre; var ingMo = mineral * s.proporcionMolibdeno * s.recuperacion * s.factorLibrasPorTon * p.precioMolibdeno; var ingAu = mineral * s.proporcionOro * s.recuperacion / s.gramosPorOnza * p.precioOro; var ingAg = mineral * s.proporcionPlata * s.recuperacion / s.gramosPorOnza * p.precioPlata; var ingSub = ingMo + ingAu + ingAg; var ingTotal = ingCu + ingSub; var costoMina = mineral * (p.costoInsumos + p.consumoAcido * s.precioAcido); var costoPlanta = mineral * (p.consumoAgua * s.factorAgua + p.costoEnergia * s.factorEnergia + s.costoPlantaBase); var costoFlete = mineral * p.fletePuerto; var costoTC = prod * p.tcrc; var costoOp = costoMina + costoPlanta + costoFlete + costoTC; var ebitda = (ingTotal - costoOp) / 1_000_000; var costoTotal = costoOp + (p.depreciacion * 1_000_000); var c1 = costoOp / (prod * s.factorLibrasPorTon); var c2 = costoTotal / (prod * s.factorLibrasPorTon); var margen = p.precioCobre - c2; return { produccionCobre: Math.round(prod), ebitda: +ebitda.toFixed(2), costoC1: +c1.toFixed(2), costoC2: +c2.toFixed(2), margenUnitario: +margen.toFixed(2) }; }"
+}
