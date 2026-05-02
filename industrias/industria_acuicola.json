@@ -1,0 +1,82 @@
+{
+  "nombre": "Acuícola (Salmón) – Profundizado",
+  "supuestos": {
+    "biomasaInicial": 12_500,
+    "costoAlimento": 1_200,
+    "costoSanitarioBase": 1_500,
+    "factorCaligus": 250,
+    "factorTemperatura": 0.08,
+    "temperaturaReferencia": 14,
+    "otrosCostosUnit": 500,
+    "factorAntibioticos": 200,
+    "factorEscapes": 150
+  },
+  "elasticidades": {
+    "fcr": -0.92,
+    "mort": -0.85,
+    "calig": -0.65,
+    "yield": 0.88,
+    "price": 1.10,
+    "fx": 0,
+    "temp": -0.3
+  },
+  "incertidumbre": {
+    "fcr": { "min": 1.0, "max": 1.8 },
+    "mort": { "min": 3, "max": 22 },
+    "calig": { "min": 0, "max": 9 },
+    "yield": { "min": 72, "max": 94 },
+    "price": { "min": 3.5, "max": 7.5 },
+    "fx": { "min": 750, "max": 1000 },
+    "temp": { "min": 9, "max": 17 }
+  },
+  "nodos": [
+    {"id":"fcr","label":"FCR","tipo":"driver","unidades":"","elasticidad":-0.92},
+    {"id":"mort","label":"Mortalidad (%)","tipo":"driver","unidades":"%","elasticidad":-0.85},
+    {"id":"calig","label":"Caligus (índice)","tipo":"driver","unidades":"índice","elasticidad":-0.65},
+    {"id":"yield","label":"Yield Planta (%)","tipo":"driver","unidades":"%","elasticidad":0.88},
+    {"id":"price","label":"Precio USD/kg","tipo":"driver","unidades":"$/kg","elasticidad":1.10},
+    {"id":"fx","label":"Tipo Cambio (CLP)","tipo":"driver","unidades":"CLP","elasticidad":0},
+    {"id":"temp","label":"Temp. Mar (°C)","tipo":"driver","unidades":"°C","elasticidad":-0.3},
+    {"id":"biomasa","label":"Biomasa (ton)","tipo":"intermedio","unidades":"ton","elasticidad":0},
+    {"id":"vol","label":"Volumen (ton)","tipo":"intermedio","unidades":"ton","elasticidad":0},
+    {"id":"ebitda","label":"EBITDA (M USD)","tipo":"resultado","unidades":"M USD","elasticidad":0},
+    {"id":"fcrBiologico","label":"FCR Biológico","tipo":"intermedio","unidades":"","elasticidad":0},
+    {"id":"huellaCarbono","label":"Huella CO₂ (kg/kg)","tipo":"intermedio","unidades":"kg CO₂/kg","elasticidad":0},
+    {"id":"usoAntibioticos","label":"Antibióticos (g/ton)","tipo":"intermedio","unidades":"g/ton","elasticidad":0}
+  ],
+  "arcos": [
+    {"origen":"fcr","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"mort","destino":"biomasa","polaridad":"negativo"},
+    {"origen":"mort","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"calig","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"yield","destino":"vol","polaridad":"positivo"},
+    {"origen":"price","destino":"ebitda","polaridad":"positivo"},
+    {"origen":"fx","destino":"ebitda","polaridad":"positivo"},
+    {"origen":"temp","destino":"mort","polaridad":"positivo"},
+    {"origen":"temp","destino":"ebitda","polaridad":"negativo"}
+  ],
+  "kpis": [
+    {"id":"fcr","label":"FCR","base":1.3,"unidades":"","formato":"num"},
+    {"id":"mort","label":"Mortalidad","base":8,"unidades":"%","formato":"num"},
+    {"id":"calig","label":"Caligus","base":3,"unidades":"índice","formato":"num"},
+    {"id":"yield","label":"Yield","base":82,"unidades":"%","formato":"num"},
+    {"id":"price","label":"Precio USD","base":5.5,"unidades":"$/kg","formato":"num"},
+    {"id":"ebitda","label":"EBITDA","base":0,"unidades":"M USD","formato":"dinero"},
+    {"id":"fcrBiologico","label":"FCR Bio","base":1.4,"unidades":"","formato":"num"},
+    {"id":"huellaCarbono","label":"CO₂/kg","base":2.8,"unidades":"kg","formato":"num"},
+    {"id":"usoAntibioticos","label":"Antib. (g/ton)","base":0.06,"unidades":"g/ton","formato":"num"}
+  ],
+  "cadenas": [
+    {"nombre":"FCR alto","descripcion":"Costo alimento ↑ → EBITDA ↓","impacto":"-$8.5M","polaridad":"negativo"},
+    {"nombre":"Mortalidad elevada","descripcion":"Biomasa ↓ → Volumen ↓ → Ingreso ↓","impacto":"-$12M","polaridad":"negativo"},
+    {"nombre":"Presión de Caligus","descripcion":"Costo sanitario ↑ + riesgo antibióticos","impacto":"-$6.2M","polaridad":"negativo"},
+    {"nombre":"Aumento de temperatura","descripcion":"Mayor mortalidad y costo sanitario","impacto":"Riesgo climático","polaridad":"negativo"}
+  ],
+  "escenarios": [
+    {"nombre":"Base","palancas":{"fcr":1.3,"mort":8,"calig":3,"yield":82,"price":5.5,"fx":850,"temp":12}},
+    {"nombre":"Crisis Sanitaria","palancas":{"fcr":1.5,"mort":15,"calig":7,"yield":78,"price":4.8,"fx":880,"temp":16}},
+    {"nombre":"Mercado Favorable","palancas":{"fcr":1.2,"mort":6,"calig":2,"yield":85,"price":6.5,"fx":820,"temp":11}}
+  ],
+  "initState": {"fcr":1.3,"mort":8,"calig":3,"yield":82,"price":5.5,"fx":850,"temp":12},
+  "formulaPrincipal": "function(p,s,ctx){var biomasa=s.biomasaInicial*(1-p.mort/100);var vol=biomasa*(p.yield/100);var ing=vol*p.price*1000*p.fx;var cAlim=s.biomasaInicial*p.fcr*s.costoAlimento*1000;var factorTemp=(p.temp||s.temperaturaReferencia)>s.temperaturaReferencia?1+((p.temp||s.temperaturaReferencia)-s.temperaturaReferencia)*s.factorTemperatura:1;var cSan=(s.costoSanitarioBase+p.calig*s.factorCaligus)*1000*factorTemp;var limAntib=p.calig>6?(p.calig-6)*s.factorAntibioticos:0;var riesgoEsc=p.mort>15?(p.mort-15)*s.factorEscapes:0;var cNorm=(limAntib+riesgoEsc)*1000;var otros=s.biomasaInicial*s.otrosCostosUnit*1000;var ebitda=(ing-cAlim-cSan-cNorm-otros)/1_000_000;var fcrBio=p.fcr*(1+p.calig*0.03);var huella=p.fcr*2.1+(p.temp>14?0.3:0);var antib=p.calig*0.02;return{biomasa:Math.round(biomasa),vol:Math.round(vol),ebitda:+ebitda.toFixed(2),fcrBiologico:+fcrBio.toFixed(2),huellaCarbono:+huella.toFixed(2),usoAntibioticos:+antib.toFixed(3)};}"
+}
