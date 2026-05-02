@@ -1,0 +1,77 @@
+{
+  "nombre": "Telecomunicaciones (Profundizado)",
+  "supuestos": {
+    "suscriptoresMoviles": 1_800_000,
+    "suscriptoresFijos": 400_000,
+    "costoOperativoPorSuscriptor": 42_000,
+    "inversionEspectroBase": 8_500_000_000,
+    "factorMultaSubtel": 2_500_000
+  },
+  "elasticidades": {
+    "arpuMovil": 1.1,
+    "arpuFijo": 0.9,
+    "churnVoluntario": -0.8,
+    "churnInvoluntario": -0.7,
+    "capexEspectro": -0.5,
+    "calidadServicio": 0.9,
+    "penetracionOTT": -0.4,
+    "quejasSubtel": -0.35,
+    "atencionCliente": 0.5
+  },
+  "incertidumbre": {
+    "arpuMovil": { "min": 6000, "max": 16000 },
+    "arpuFijo": { "min": 10000, "max": 20000 },
+    "churnVoluntario": { "min": 1.0, "max": 6.0 },
+    "churnInvoluntario": { "min": 0.5, "max": 4.0 },
+    "capexEspectro": { "min": 4_000, "max": 15_000 },
+    "calidadServicio": { "min": 82, "max": 99 },
+    "penetracionOTT": { "min": 35, "max": 75 },
+    "quejasSubtel": { "min": 40, "max": 350 },
+    "atencionCliente": { "min": 50, "max": 90 }
+  },
+  "nodos": [
+    {"id":"arpuMovil","label":"ARPU Móvil (CLP/mes)","tipo":"driver","unidades":"CLP/mes","elasticidad":1.1},
+    {"id":"arpuFijo","label":"ARPU Fijo (CLP/mes)","tipo":"driver","unidades":"CLP/mes","elasticidad":0.9},
+    {"id":"churnVoluntario","label":"Churn Voluntario (%)","tipo":"driver","unidades":"%","elasticidad":-0.8},
+    {"id":"churnInvoluntario","label":"Churn Involuntario (%)","tipo":"driver","unidades":"%","elasticidad":-0.7},
+    {"id":"capexEspectro","label":"CAPEX Espectro 5G (M CLP/año)","tipo":"driver","unidades":"M CLP/año","elasticidad":-0.5},
+    {"id":"calidadServicio","label":"Calidad de Servicio (%)","tipo":"driver","unidades":"%","elasticidad":0.9},
+    {"id":"penetracionOTT","label":"Penetración OTT (%)","tipo":"driver","unidades":"%","elasticidad":-0.4},
+    {"id":"quejasSubtel","label":"Quejas Subtel (casos/mes)","tipo":"driver","unidades":"casos/mes","elasticidad":-0.35},
+    {"id":"atencionCliente","label":"Atención al Cliente (0-100)","tipo":"driver","unidades":"puntos","elasticidad":0.5},
+    {"id":"ebitda","label":"EBITDA (M CLP)","tipo":"resultado","unidades":"M CLP","elasticidad":0},
+    {"id":"suscriptoresNetos","label":"Suscriptores Netos","tipo":"intermedio","unidades":"miles","elasticidad":0},
+    {"id":"riesgoRegulatorio","label":"Riesgo Regulatorio","tipo":"intermedio","unidades":"%","elasticidad":0}
+  ],
+  "arcos": [
+    {"origen":"arpuMovil","destino":"ebitda","polaridad":"positivo"},
+    {"origen":"arpuFijo","destino":"ebitda","polaridad":"positivo"},
+    {"origen":"churnVoluntario","destino":"suscriptoresNetos","polaridad":"negativo"},
+    {"origen":"churnInvoluntario","destino":"suscriptoresNetos","polaridad":"negativo"},
+    {"origen":"calidadServicio","destino":"churnInvoluntario","polaridad":"negativo"},
+    {"origen":"penetracionOTT","destino":"arpuMovil","polaridad":"negativo"},
+    {"origen":"atencionCliente","destino":"churnVoluntario","polaridad":"negativo"},
+    {"origen":"quejasSubtel","destino":"riesgoRegulatorio","polaridad":"positivo"},
+    {"origen":"capexEspectro","destino":"ebitda","polaridad":"negativo"}
+  ],
+  "kpis": [
+    {"id":"arpuMovil","label":"ARPU Móvil","base":9800,"unidades":"CLP/mes","formato":"num"},
+    {"id":"arpuFijo","label":"ARPU Fijo","base":14500,"unidades":"CLP/mes","formato":"num"},
+    {"id":"calidadServicio","label":"Calidad","base":94,"unidades":"%","formato":"num"},
+    {"id":"ebitda","label":"EBITDA","base":0,"unidades":"M CLP","formato":"dinero"},
+    {"id":"suscriptoresNetos","label":"Suscriptores","base":1800,"unidades":"miles","formato":"num"},
+    {"id":"riesgoRegulatorio","label":"Riesgo Subtel","base":5,"unidades":"%","formato":"num"}
+  ],
+  "cadenas": [
+    {"nombre":"Caída ARPU por OTTs","descripcion":"WhatsApp/streaming reemplazan servicios tradicionales → ARPU móvil ↓ → EBITDA ↓","impacto":"Estructural","polaridad":"negativo"},
+    {"nombre":"Quejas ante Subtel","descripcion":"Mala calidad → quejas ↑ → riesgo de multas y obligaciones de servicio","impacto":"Regulatorio creciente","polaridad":"negativo"},
+    {"nombre":"Inversión en fibra y 5G","descripcion":"Mayor CAPEX hoy → más ARPU fijo mañana → recuperación de inversión","impacto":"Estratégico","polaridad":"positivo"}
+  ],
+  "escenarios": [
+    {"nombre":"Base","palancas":{"arpuMovil":9800,"arpuFijo":14500,"churnVoluntario":2.2,"churnInvoluntario":1.5,"capexEspectro":8500,"calidadServicio":94,"penetracionOTT":55,"quejasSubtel":120,"atencionCliente":72}},
+    {"nombre":"Guerra de Precios","palancas":{"arpuMovil":7500,"arpuFijo":12000,"churnVoluntario":4.0,"churnInvoluntario":2.8,"capexEspectro":6000,"calidadServicio":88,"penetracionOTT":65,"quejasSubtel":250,"atencionCliente":60}},
+    {"nombre":"Líder en Fibra","palancas":{"arpuMovil":10500,"arpuFijo":17500,"churnVoluntario":1.8,"churnInvoluntario":1.2,"capexEspectro":12000,"calidadServicio":97,"penetracionOTT":50,"quejasSubtel":80,"atencionCliente":82}}
+  ],
+  "initState": {"arpuMovil":9800,"arpuFijo":14500,"churnVoluntario":2.2,"churnInvoluntario":1.5,"capexEspectro":8500,"calidadServicio":94,"penetracionOTT":55,"quejasSubtel":120,"atencionCliente":72},
+  "formulaPrincipal": "function(p,s,ctx){var susTotal=s.suscriptoresMoviles+s.suscriptoresFijos;var ingMov=susTotal*p.arpuMovil*12*0.85;var ingFijo=susTotal*(p.arpuFijo||14500)*12*0.15;var ingTotal=ingMov+ingFijo;var churnTotal=((p.churnVoluntario||2.2)+(p.churnInvoluntario||1.5))/100;var susNetos=Math.round(susTotal*(1-churnTotal));var costosOp=susNetos*s.costoOperativoPorSuscriptor;var capex=(p.capexEspectro||8500)*1_000_000;var multaSubtel=p.quejasSubtel>150?(p.quejasSubtel-150)*s.factorMultaSubtel:0;var ebitda=(ingTotal-costosOp-capex-multaSubtel)/1_000_000;var riesgo=Math.min(25,p.quejasSubtel/12);return{ebitda:+ebitda.toFixed(2),suscriptoresNetos:Math.round(susNetos/1_000),riesgoRegulatorio:+riesgo.toFixed(1)};}"
+}
