@@ -1,0 +1,80 @@
+{
+  "nombre": "Agroindustria y Alimentos (Profundizado)",
+  "supuestos": {
+    "hectareas": 850,
+    "rendimientoBase": 28,
+    "costoFijoPorHa": 3_200_000,
+    "premiumCertificacion": 1.08
+  },
+  "elasticidades": {
+    "rendimiento": 0.9,
+    "precioExportacion": 1.2,
+    "costoAgua": -0.5,
+    "incidenciaPlagas": -0.6,
+    "tipoCambio": 1.0,
+    "costoManoObra": -0.45,
+    "riegoTecnificado": 0.7,
+    "certificacionGlobalGAP": 0.6,
+    "fleteMaritimo": -0.4,
+    "tasaRechazoPacking": -0.5
+  },
+  "incertidumbre": {
+    "rendimiento": { "min": 60, "max": 105 },
+    "precioExportacion": { "min": 2.5, "max": 7.5 },
+    "costoAgua": { "min": 150, "max": 500 },
+    "incidenciaPlagas": { "min": 2, "max": 14 },
+    "tipoCambio": { "min": 800, "max": 1000 },
+    "costoManoObra": { "min": 22_000, "max": 38_000 },
+    "riegoTecnificado": { "min": 10, "max": 70 },
+    "certificacionGlobalGAP": { "min": 60, "max": 100 },
+    "fleteMaritimo": { "min": 100, "max": 200 },
+    "tasaRechazoPacking": { "min": 1.5, "max": 8 }
+  },
+  "nodos": [
+    {"id":"rendimiento","label":"Rendimiento (% base)","tipo":"driver","unidades":"%","elasticidad":0.9},
+    {"id":"precioExportacion","label":"Precio Exportación (USD/kg)","tipo":"driver","unidades":"USD/kg","elasticidad":1.2},
+    {"id":"costoAgua","label":"Costo Agua (CLP/m³)","tipo":"driver","unidades":"CLP/m³","elasticidad":-0.5},
+    {"id":"incidenciaPlagas","label":"Incidencia Plagas Campo (%)","tipo":"driver","unidades":"%","elasticidad":-0.6},
+    {"id":"tipoCambio","label":"Tipo Cambio (CLP/USD)","tipo":"driver","unidades":"CLP","elasticidad":1.0},
+    {"id":"costoManoObra","label":"Costo Mano de Obra (CLP/día)","tipo":"driver","unidades":"CLP/día","elasticidad":-0.45},
+    {"id":"riegoTecnificado","label":"Riego Tecnificado (%)","tipo":"driver","unidades":"%","elasticidad":0.7},
+    {"id":"certificacionGlobalGAP","label":"Certificación GlobalG.A.P. (%)","tipo":"driver","unidades":"%","elasticidad":0.6},
+    {"id":"fleteMaritimo","label":"Flete Marítimo (USD/ton)","tipo":"driver","unidades":"USD/ton","elasticidad":-0.4},
+    {"id":"tasaRechazoPacking","label":"Rechazo en Packing (%)","tipo":"driver","unidades":"%","elasticidad":-0.5},
+    {"id":"ebitda","label":"EBITDA (M USD)","tipo":"resultado","unidades":"M USD","elasticidad":0},
+    {"id":"produccionExportable","label":"Producción Exportable (ton)","tipo":"intermedio","unidades":"ton","elasticidad":0},
+    {"id":"huellaHidrica","label":"Huella Hídrica (m³/ton)","tipo":"intermedio","unidades":"m³/ton","elasticidad":0}
+  ],
+  "arcos": [
+    {"origen":"rendimiento","destino":"produccionExportable","polaridad":"positivo"},
+    {"origen":"riegoTecnificado","destino":"rendimiento","polaridad":"positivo"},
+    {"origen":"riegoTecnificado","destino":"costoAgua","polaridad":"negativo"},
+    {"origen":"costoAgua","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"incidenciaPlagas","destino":"produccionExportable","polaridad":"negativo"},
+    {"origen":"certificacionGlobalGAP","destino":"precioExportacion","polaridad":"positivo"},
+    {"origen":"tasaRechazoPacking","destino":"produccionExportable","polaridad":"negativo"},
+    {"origen":"fleteMaritimo","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"costoManoObra","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"tipoCambio","destino":"ebitda","polaridad":"positivo"}
+  ],
+  "kpis": [
+    {"id":"precioExportacion","label":"Precio Exp.","base":4.8,"unidades":"USD/kg","formato":"num"},
+    {"id":"rendimiento","label":"Rendimiento","base":92,"unidades":"%","formato":"num"},
+    {"id":"incidenciaPlagas","label":"Plagas","base":5.5,"unidades":"%","formato":"num"},
+    {"id":"ebitda","label":"EBITDA","base":0,"unidades":"M USD","formato":"dinero"},
+    {"id":"produccionExportable","label":"Prod. Export.","base":0,"unidades":"ton","formato":"num"},
+    {"id":"huellaHidrica","label":"Huella Hídrica","base":12.5,"unidades":"m³/ton","formato":"num"}
+  ],
+  "cadenas": [
+    {"nombre":"Sequía y costo de agua","descripcion":"Menor disponibilidad → mayor costo → menor rendimiento → menos EBITDA","impacto":"Riesgo climático","polaridad":"negativo"},
+    {"nombre":"Inversión en riego tecnificado","descripcion":"Reduce consumo de agua + mejora rendimiento → más producción exportable","impacto":"Inversión rentable","polaridad":"positivo"},
+    {"nombre":"Pérdida de certificación","descripcion":"Sin GlobalG.A.P. → precio de exportación baja → pérdida de mercados premium","impacto":"Riesgo comercial","polaridad":"negativo"}
+  ],
+  "escenarios": [
+    {"nombre":"Base","palancas":{"rendimiento":92,"precioExportacion":4.8,"costoAgua":280,"incidenciaPlagas":5.5,"tipoCambio":900,"costoManoObra":28000,"riegoTecnificado":35,"certificacionGlobalGAP":85,"fleteMaritimo":145,"tasaRechazoPacking":3.5}},
+    {"nombre":"Sequía Severa","palancas":{"rendimiento":72,"precioExportacion":4.5,"costoAgua":450,"incidenciaPlagas":9,"tipoCambio":880,"costoManoObra":32000,"riegoTecnificado":20,"certificacionGlobalGAP":78,"fleteMaritimo":160,"tasaRechazoPacking":6}},
+    {"nombre":"Boom Exportador","palancas":{"rendimiento":98,"precioExportacion":6.2,"costoAgua":250,"incidenciaPlagas":3,"tipoCambio":950,"costoManoObra":26000,"riegoTecnificado":55,"certificacionGlobalGAP":95,"fleteMaritimo":125,"tasaRechazoPacking":2}}
+  ],
+  "initState": {"rendimiento":92,"precioExportacion":4.8,"costoAgua":280,"incidenciaPlagas":5.5,"tipoCambio":900,"costoManoObra":28000,"riegoTecnificado":35,"certificacionGlobalGAP":85,"fleteMaritimo":145,"tasaRechazoPacking":3.5},
+  "formulaPrincipal": "function(p,s,ctx){var prod=s.hectareas*s.rendimientoBase*(p.rendimiento/100)*(1+p.riegoTecnificado/300);var merma=p.incidenciaPlagas*0.01+p.tasaRechazoPacking/100;var export=prod*(1-merma);var ing=export*1000*p.precioExportacion;var cAgua=prod*p.costoAgua*650*(1-p.riegoTecnificado/250);var cMan=s.hectareas*12*p.costoManoObra*30;var cFlete=export*p.fleteMaritimo;var cFijo=s.hectareas*s.costoFijoPorHa;var cTotal=cAgua+cMan+cFlete+cFijo;var cTotalUSD=cTotal/p.tipoCambio;var premium=p.certificacionGlobalGAP>80?s.premiumCertificacion:1;var ingFinal=ing*premium;var ebitda=(ingFinal-cTotalUSD)/1_000_000;var huella=p.costoAgua*12.5*(1-p.riegoTecnificado/280);return{ebitda:+ebitda.toFixed(2),produccionExportable:Math.round(export),huellaHidrica:+huella.toFixed(1)};}"
+}
