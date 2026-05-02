@@ -6,225 +6,159 @@
 <title>PRISMA · by GL Strategic</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root{--bg:#06090e;--surface:#0c1118;--panel:#111922;--card:#141e2b;--border:#1e2d3f;--text:#e2e9f3;--muted:#6b809b;--teal:#00a89d;--gold:#c9a84c;--blue:#378add;--red:#e05252}
+:root{--bg:#06090e;--surface:#0c1118;--panel:#111922;--card:#141e2b;--border:#1e2d3f;--text:#e2e9f3;--muted:#6b809b;--teal:#00a89d;--gold:#c9a84c;--blue:#378add;--red:#e05252;--warn:#c9a84c;--purple:#8b5cf6}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh}
 .topbar{background:linear-gradient(135deg,#0c1118,#111922);border-bottom:1px solid var(--border);padding:.4rem 1rem;min-height:48px;display:flex;align-items:center;gap:.6rem;flex-shrink:0;flex-wrap:wrap}
-.brand{font-weight:800;font-size:.9rem;color:var(--gold)}
-.topbar select,button{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:.3rem .6rem;border-radius:5px;font-size:.75rem;cursor:pointer}
+.brand{font-weight:800;font-size:.9rem;color:var(--gold);letter-spacing:-0.3px}
+.topbar select,button{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:.3rem .6rem;border-radius:5px;font-size:.73rem;cursor:pointer}
 button{background:var(--teal);color:#000;font-weight:700;border:none}
 .main{flex:1;display:flex;overflow:hidden}
 .sidebar{width:300px;background:var(--panel);border-right:1px solid var(--border);padding:.6rem;overflow-y:auto}
 .content{flex:1;padding:.6rem;overflow-y:auto}
-.palanca{margin-bottom:.5rem}
+.palanca{margin-bottom:.55rem}
 .palanca label{display:flex;justify-content:space-between;font-size:.7rem;font-weight:600;color:var(--muted)}
-.palanca input{width:100%;margin-top:.1rem}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.4rem;margin-bottom:.5rem}
-.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:.5rem;position:relative;overflow:hidden}
-.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.palanca input{width:100%;margin-top:.15rem}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.5rem;margin-bottom:.6rem}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.55rem;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--teal)}
+.kpi-card.alert::before{background:var(--red)}
 .kpi-card .label{font-size:.6rem;color:var(--muted);text-transform:uppercase}
-.kpi-card .value{font-size:1.1rem;font-weight:800;margin:.1rem 0}
-.kpi-card .sub{font-size:.55rem;color:var(--muted)}
-.tabs{display:flex;gap:.3rem;margin-bottom:.5rem;flex-wrap:wrap}
-.tab{padding:.25rem .6rem;border-radius:4px;cursor:pointer;font-size:.7rem;background:var(--panel);border:1px solid var(--border);color:var(--muted)}
+.kpi-card .value{font-size:1.15rem;font-weight:800;margin:.12rem 0}
+.tabs{display:flex;gap:.3rem;margin-bottom:.6rem;flex-wrap:wrap}
+.tab{padding:.3rem .7rem;border-radius:5px;cursor:pointer;font-size:.72rem;background:var(--panel);border:1px solid var(--border);color:var(--muted)}
 .tab.active{background:var(--teal);color:#000;font-weight:700}
 .tab-content{display:none}
 .tab-content.active{display:block}
-canvas{max-height:250px;margin-top:.3rem}
-.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem}
-.board-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem}
-.exec-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.7rem;margin-bottom:.5rem}
-.rec-box{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:8px;padding:.6rem;margin-bottom:.4rem}
-.rec-box.warn{border-left-color:var(--gold)}
-.rec-title{font-size:.7rem;font-weight:700;color:var(--teal);margin-bottom:.2rem}
-.rec-desc{font-size:.65rem;color:var(--muted);line-height:1.5}
+canvas{max-height:280px;margin-top:.3rem}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.6rem}
+.plan-table{width:100%;border-collapse:collapse;font-size:.68rem;margin:.5rem 0}
+.plan-table th{text-align:left;padding:.3rem .5rem;font-size:.58rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border)}
+.plan-table td{padding:.3rem .5rem;border-bottom:1px solid var(--border)}
+.narrative-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.7rem;margin-bottom:.5rem;line-height:1.5}
 .grafo-container{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.4rem;overflow:auto}
-.grafo-container svg{width:100%;min-height:350px}
-.data-table{width:100%;border-collapse:collapse;font-size:.65rem;margin-top:.3rem}
-.data-table th{text-align:left;padding:.3rem .5rem;font-size:.58rem;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border)}
-.data-table td{padding:.3rem .5rem;border-bottom:1px solid var(--border)}
-@media(max-width:900px){.sidebar{width:100%;max-height:30vh}.main{flex-direction:column}.chart-row,.board-grid{grid-template-columns:1fr}}
+.grafo-container svg{width:100%;height:auto;min-height:360px}
+.evidence-table{width:100%;border-collapse:collapse;font-size:.65rem}
+.evidence-table th{text-align:left;padding:.35rem .5rem;font-size:.58rem;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border)}
+.evidence-table td{padding:.35rem .5rem;border-bottom:1px solid var(--border)}
+@media(max-width:900px){.sidebar{width:100%;max-height:30vh}.main{flex-direction:column}.chart-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="topbar">
   <div class="brand">◆ PRISMA <small style="color:var(--muted);font-size:.55rem">by GL Strategic</small></div>
   <span style="color:var(--muted);font-size:.65rem">Industria:</span>
-  <select id="indSel"><option value="acuicola">Acuícola</option><option value="mineria">Minería</option><option value="clinica">Clínica Privada</option><option value="hospital">Hospital Público</option><option value="retail">Retail</option><option value="logistica">Logística</option><option value="telecom">Telecom</option><option value="agro">Agroindustria</option><option value="energia">Energía</option></select>
+  <select id="indSel"><option value="acuicola" selected>Acuícola</option><option value="mineria">Minería</option><option value="clinica">Clínica</option><option value="hospital">Hospital</option><option value="retail">Retail</option><option value="logistica">Logística</option><option value="telecom">Telecom</option><option value="agro">Agro</option><option value="energia">Energía</option></select>
   <span style="color:var(--muted);font-size:.65rem">Empresa:</span>
   <select id="empSel" style="min-width:140px"></select>
-  <button onclick="anchorBase()">📌 Anclar</button>
+  <span style="color:var(--muted);font-size:.65rem;margin-left:0.4rem">Escenario:</span>
+  <select id="scenarioSel" onchange="loadScn(this.value)"><option value="">— Personalizado —</option></select>
   <button onclick="runMC()">🎲 Montecarlo</button>
+  <button onclick="resetSliders()">↺ Reset</button>
 </div>
 <div class="main">
   <div class="sidebar" id="sidebar">
-    <div style="margin-bottom:.4rem">
-      <label style="font-size:.6rem;color:var(--muted);font-weight:700">Escenario:</label>
-      <select id="scenarioSel" onchange="loadScn(this.value)" style="width:100%"><option value="">— Personalizado —</option></select>
-    </div>
     <div id="palancasContainer"></div>
-    <button onclick="resetSliders()" style="width:100%;margin-top:.4rem;background:var(--panel);color:var(--teal);border:1px solid var(--teal)">↺ Resetear</button>
   </div>
   <div class="content">
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('kpis')">📊 KPIs</button>
-      <button class="tab" onclick="switchTab('boardroom')">💼 Boardroom</button>
+      <button class="tab active" onclick="switchTab('kpis')">📊 KPIs & Resumen</button>
+      <button class="tab" onclick="switchTab('plan')">🎯 Plan de Acción</button>
+      <button class="tab" onclick="switchTab('cadenas')">⛓️ Cadenas</button>
       <button class="tab" onclick="switchTab('grafo')">🔗 Grafo</button>
-      <button class="tab" onclick="switchTab('escenarios')">📋 Escenarios</button>
+      <button class="tab" onclick="switchTab('evidencia')">📋 Evidencia</button>
+      <button class="tab" onclick="switchTab('escenarios')">📊 Escenarios</button>
     </div>
-    <div id="tab-kpis" class="tab-content active"><div class="kpi-grid" id="kpiContainer"></div><div class="chart-row"><div><canvas id="impactChart"></canvas></div><div><canvas id="tornadoChart"></canvas></div></div></div>
-    <div id="tab-boardroom" class="tab-content"><div id="boardroomContent"></div></div>
+    <div id="tab-kpis" class="tab-content active"><div class="kpi-grid" id="kpiContainer"></div><div class="chart-row"><div><canvas id="impactChart"></canvas></div><div><canvas id="tornadoChart"></canvas></div></div><div class="narrative-box" id="execSummary"></div></div>
+    <div id="tab-plan" class="tab-content"><div id="planContent"></div></div>
+    <div id="tab-cadenas" class="tab-content"><div id="cadenasContent"></div></div>
     <div id="tab-grafo" class="tab-content"><div class="grafo-container" id="grafoContainer"></div></div>
+    <div id="tab-evidencia" class="tab-content"><div id="evidenciaContent"></div></div>
     <div id="tab-escenarios" class="tab-content"><div id="escenariosContent"></div></div>
   </div>
 </div>
 <script>
-// ═══════════════════════════════════════════════════
-// DATOS REALES CALIBRADOS (todas las industrias)
-// ═══════════════════════════════════════════════════
-const CTX={dolar_clp:920,uf_clp:37500};
-
+const CTX={dolar_clp:920};
+// Empresas
 const COMPANIES={
-  acuicola:[{id:"aquachile",nombre:"AquaChile",perfil:{biomasaInicial:22000,fcr:1.28,mort:6.5,calig:2.2,yield:84,costoAlim:1150,costoProc:1.05,precioUSD:6.8}},{id:"mowi",nombre:"Mowi Chile",perfil:{biomasaInicial:24000,fcr:1.25,mort:6.0,calig:2.0,yield:85,costoAlim:1100,costoProc:1.00,precioUSD:7.0}},{id:"cermaq",nombre:"Cermaq Chile",perfil:{biomasaInicial:18000,fcr:1.30,mort:7.2,calig:2.5,yield:83,costoAlim:1180,costoProc:1.10,precioUSD:6.5}},{id:"camanchaca",nombre:"Salmones Camanchaca",perfil:{biomasaInicial:16000,fcr:1.32,mort:7.5,calig:2.8,yield:82,costoAlim:1200,costoProc:1.20,precioUSD:6.3}},{id:"blumar",nombre:"Blumar",perfil:{biomasaInicial:14000,fcr:1.33,mort:7.8,calig:3.0,yield:81.5,costoAlim:1220,costoProc:1.15,precioUSD:6.2}},{id:"multix",nombre:"Multi X",perfil:{biomasaInicial:15000,fcr:1.31,mort:7.3,calig:2.7,yield:82.5,costoAlim:1190,costoProc:1.18,precioUSD:6.4}},{id:"australis",nombre:"Australis",perfil:{biomasaInicial:12000,fcr:1.35,mort:8.0,calig:3.2,yield:81,costoAlim:1240,costoProc:1.22,precioUSD:6.1}},{id:"yadran",nombre:"Yadran",perfil:{biomasaInicial:8000,fcr:1.38,mort:8.5,calig:3.5,yield:80,costoAlim:1280,costoProc:1.25,precioUSD:5.9}}],
-  mineria:[{id:"codelco_andina",nombre:"Codelco Andina",perfil:{produccionBase:60000,ley:0.72,leyCabezaBase:0.72,recuperacion:0.86,depreciacion:75,costoInsumos:20,costoEnergia:85,precioCobre:4.0}},{id:"escondida",nombre:"BHP Escondida",perfil:{produccionBase:120000,ley:0.85,leyCabezaBase:0.85,recuperacion:0.90,depreciacion:140,costoInsumos:18,costoEnergia:72,precioCobre:4.2}},{id:"los_pelambres",nombre:"Los Pelambres",perfil:{produccionBase:55000,ley:0.68,leyCabezaBase:0.68,recuperacion:0.85,depreciacion:62,costoInsumos:22,costoEnergia:88,precioCobre:3.9}}],
-  clinica:[{id:"alemana",nombre:"Clínica Alemana",perfil:{camas:120,ocupacion:84,estancia:3.5,tarifa:450,readmision:2.8,costoInsumos:210,inflacion:4.2}},{id:"las_condes",nombre:"Clínica Las Condes",perfil:{camas:140,ocupacion:82,estancia:3.7,tarifa:420,readmision:3.0,costoInsumos:200,inflacion:4.0}}],
-  hospital:[{id:"sotero",nombre:"Hospital Sótero del Río",perfil:{camas:300,ocupacion:88,estancia:4.8,presupuestoBase:52e9,costoInsumos:250,inflacion:4.2,avanceLE:12,ejecucion:96}},{id:"concepcion",nombre:"Hospital de Concepción",perfil:{camas:250,ocupacion:84,estancia:5.2,presupuestoBase:42e9,costoInsumos:220,inflacion:4.0,avanceLE:10,ejecucion:94}}],
-  retail:[{id:"falabella",nombre:"Falabella",perfil:{tiendas:52,trafico:88,ticketPromedio:14800,tasaConversion:24,margenBrutoPct:44,costoLogisticaPct:8,mermaPct:2.8,penetracionOnline:32,costoArriendo:5.8,gastoMarketing:120}}],
-  logistica:[{id:"saam",nombre:"SAAM",perfil:{flotaPropia:100,flotaSubcontratada:60,ocupacionFlota:88,tarifaFlete:3.2,precioCombustible:1050,tasaAtrasos:8,tasaSiniestralidad:2.5,costoNeumaticos:0.18,congestionRuta:15}}],
-  telecom:[{id:"entel",nombre:"Entel",perfil:{suscriptoresMoviles:2500000,suscriptoresFijos:600000,arpuMovil:10500,arpuFijo:15500,churnVoluntario:1.8,calidadServicio:95}}],
-  agro:[{id:"hortifrut",nombre:"Hortifrut",perfil:{hectareas:1200,rendimientoBase:30,rendimiento:94,precioExportacion:5.2,incidenciaPlagas:5.5,costoAgua:280,costoManoObra:28000,riegoTecnificado:35,certificacionGlobalGAP:85,fleteMaritimo:145,tasaRechazoPacking:3.5,tipoCambio:900}}],
-  energia:[{id:"enel",nombre:"Enel Generación",perfil:{capacidadTotalMW:800,mixHidro:0.30,mixTermico:0.40,mixERNC:0.30,disponibilidadTermico:90,factorHidrologia:78,factorPlantaERNC:35,precioGas:6.5,precioCarbon:110,coberturaPPA:75,precioSpot:80,capacidadBaterias:15,restriccionTransmision:12,impuestoVerde:5,costoMantenimientoMayor:4.5}}]
+  acuicola:[{id:"aquachile",nombre:"AquaChile",perfil:{biomasaInicial:22000,fcr:1.28,mort:6.5,calig:2.2,yield:84,costoAlim:1150,costoProc:1.05,precioUSD:6.8}},{id:"mowi",nombre:"Mowi Chile",perfil:{biomasaInicial:24000,fcr:1.25,mort:6.0,calig:2.0,yield:85,costoAlim:1100,costoProc:1.00,precioUSD:7.0}},{id:"blumar",nombre:"Blumar",perfil:{biomasaInicial:14000,fcr:1.33,mort:7.8,calig:3.0,yield:81.5,costoAlim:1220,costoProc:1.15,precioUSD:6.2}}],
+  mineria:[{id:"codelco",nombre:"Codelco Andina",perfil:{produccionBase:60000,ley:0.72,leyCabezaBase:0.72,recuperacion:0.86,depreciacion:75,costoInsumos:20,costoEnergia:85,precioCobre:4.0}}],
+  clinica:[{id:"alemana",nombre:"Clínica Alemana",perfil:{camas:120,ocupacion:84,estancia:3.5,tarifa:450,readmision:2.8,costoInsumos:210,inflacion:4.2}}],
+  hospital:[{id:"sotero",nombre:"Hospital Sótero del Río",perfil:{camas:300,ocupacion:88,estancia:4.8,presupuestoBase:52e9,costoInsumos:250,avanceLE:12,ejecucion:96}}]
 };
-
-// ═══════════════════════════════════════════════════
-// INDUSTRIAS (todas con fórmulas reales)
-// ═══════════════════════════════════════════════════
+// Industrias
 const IND={
   acuicola:{
-    nombre:"Acuícola - Salmón Chileno",
-    supuestos:{biomasaInicial:12500,costoAlim:1200,costoSmolt:0.45,costoLabor:0.55,costoProc:1.15,fx:920},
+    nombre:"Acuícola — Salmón Chileno", supuestos:{biomasaInicial:12500,costoAlim:1200,costoSmolt:0.45,costoLabor:0.55,costoProc:1.15,fx:920},
     nodos:[{id:"fcr",label:"FCR",tipo:"driver",unidades:"kg/kg",elasticidad:-0.92,icon:"🍽️"},{id:"mort",label:"Mortalidad (%)",tipo:"driver",unidades:"%",elasticidad:-0.85,icon:"🦠"},{id:"calig",label:"Caligus",tipo:"driver",unidades:"índice",elasticidad:-0.65,icon:"🦐"},{id:"yield",label:"Yield (%)",tipo:"driver",unidades:"%",elasticidad:0.88,icon:"🔪"},{id:"precioUSD",label:"Precio USD/kg",tipo:"driver",unidades:"USD/kg",elasticidad:1.10,icon:"💲"},{id:"costoAlim",label:"Costo Alimento",tipo:"driver",unidades:"CLP/kg",elasticidad:-0.5,icon:"🌾"},{id:"biomasa",label:"Biomasa (t)",tipo:"intermedio",unidades:"ton",icon:"🐟"},{id:"volumen",label:"Volumen (t)",tipo:"intermedio",unidades:"ton",icon:"📦"},{id:"ebitda",label:"EBITDA",tipo:"resultado",unidades:"M USD",icon:"💰"},{id:"ebitKg",label:"EBIT/kg",tipo:"resultado",unidades:"USD/kg",icon:"💎"}],
-    kpis:[{id:"fcr",label:"FCR",base:1.30,formato:"num2"},{id:"mort",label:"Mortalidad",base:8,formato:"pct"},{id:"calig",label:"Caligus",base:3,formato:"num1"},{id:"yield",label:"Yield",base:82,formato:"pct"},{id:"precioUSD",label:"Precio USD",base:6.0,formato:"usd2"},{id:"biomasa",label:"Biomasa (t)",base:11500,formato:"num"},{id:"ebitda",label:"EBITDA",base:0,formato:"usdM"},{id:"ebitKg",label:"EBIT/kg",base:0.73,formato:"usd2"}],
+    kpis:[{id:"fcr",label:"FCR",base:1.30,formato:"num2"},{id:"mort",label:"Mortalidad",base:8,formato:"pct"},{id:"yield",label:"Yield",base:82,formato:"pct"},{id:"precioUSD",label:"Precio USD",base:6.0,formato:"usd2"},{id:"biomasa",label:"Biomasa (t)",base:11500,formato:"num"},{id:"ebitda",label:"EBITDA",base:0,formato:"usdM"},{id:"ebitKg",label:"EBIT/kg",base:0.73,formato:"usd2"}],
     arcos:[{origen:"fcr",destino:"ebitda",polaridad:"negativo"},{origen:"mort",destino:"biomasa",polaridad:"negativo"},{origen:"calig",destino:"ebitda",polaridad:"negativo"},{origen:"yield",destino:"volumen",polaridad:"positivo"},{origen:"precioUSD",destino:"ebitda",polaridad:"positivo"},{origen:"costoAlim",destino:"ebitda",polaridad:"negativo"},{origen:"biomasa",destino:"volumen",polaridad:"positivo"},{origen:"volumen",destino:"ebitda",polaridad:"positivo"}],
-    cadenas:[{nombre:"FCR elevado",causa:"Alimentación ineficiente",impacto:"+$0.88M por cada 0.05 de mejora",accion:"Optimizar alimentación digital",horizonte:"14-45 días",polaridad:"negativo"},{nombre:"Mortalidad por SRS",causa:"Brotes infecciosos",impacto:"+$0.56M por cada 1pp menos",accion:"Vacunación y monitoreo O₂",horizonte:"30-90 días",polaridad:"negativo"}],
+    cadenas:[
+      {nombre:"Precio internacional",causa:"Mercado global (USA, Brasil, China)",impacto:"Cada +$0.10/kg → +$0.94M EBITDA",accion:"Negociar contratos en Q1‑Q2. Diversificar mercados premium.",horizonte:"Inmediato",delta:"+0.94M",cambio:"+$0.10/kg",polaridad:"positivo"},
+      {nombre:"Eficiencia alimenticia (FCR)",causa:"Desperdicio de alimento",impacto:"Cada −0.05 FCR → +$0.88M EBITDA",accion:"Monitoreo digital de alimentación.",horizonte:"14‑45 días",delta:"+0.88M",cambio:"−0.05 pts",polaridad:"positivo"},
+      {nombre:"Mejora de yield",causa:"Merma en fileteado",impacto:"Cada +1 pp yield → +$0.63M EBITDA",accion:"Optimizar línea de corte.",horizonte:"30‑60 días",delta:"+0.63M",cambio:"+1 pp",polaridad:"positivo"},
+      {nombre:"Reducir mortalidad",causa:"SRS (75% muertes infecciosas)",impacto:"Cada −1 pp mort. → +$0.56M EBITDA",accion:"Vacunación y monitoreo O₂.",horizonte:"30‑90 días",delta:"+0.56M",cambio:"−1 pp",polaridad:"positivo"},
+      {nombre:"Control de Caligus",causa:"Infestación de piojos",impacto:"Cada −1 índice → +$0.25M EBITDA",accion:"Tratamiento coordinado por barrio.",horizonte:"7‑30 días",delta:"+0.25M",cambio:"−1 índice",polaridad:"positivo"}
+    ],
     escenarios:[{nombre:"Base 2025",palancas:{fcr:1.30,mort:8,calig:3,yield:82,precioUSD:6.0,costoAlim:1200}},{nombre:"Crisis Sanitaria",palancas:{fcr:1.45,mort:14,calig:7,yield:78,precioUSD:5.0,costoAlim:1350}},{nombre:"Recuperación 2026",palancas:{fcr:1.26,mort:6.5,calig:2.2,yield:84,precioUSD:7.0,costoAlim:1100}}],
     initState:{fcr:1.30,mort:8,calig:3,yield:82,precioUSD:6.0,costoAlim:1200},
-    formulaPrincipal:"function(p,s,ctx){var b=s.biomasaInicial*(1-p.mort/100);var v=b*(p.yield/100);var ing=v*p.precioUSD;var fx=s.fx||920;var ingCLP=ing*1e6*fx;var cAlim=s.biomasaInicial*p.fcr*p.costoAlim*1000;var cSmolt=s.biomasaInicial*(s.costoSmolt||0.45)*fx*1000;var cLabor=s.biomasaInicial*(s.costoLabor||0.55)*fx*1000;var cSan=(1500+p.calig*250)*1000;var cProc=b*(p.yield/100)*(s.costoProc||1.15)*fx*1000;var cTotal=cAlim+cSmolt+cLabor+cSan+cProc;var ebitdaCLP=ingCLP-cTotal;var ebitda=ebitdaCLP/(fx*1e6);var ebitKg=ebitdaCLP/(v*1000*fx);return{biomasa:Math.round(b),volumen:Math.round(v),ebitda:+ebitda.toFixed(2),ebitKg:+ebitKg.toFixed(2)};}"
+    formulaPrincipal:"function(p,s,ctx){var b=s.biomasaInicial*(1-p.mort/100);var v=b*(p.yield/100);var ing=v*p.precioUSD;var fx=s.fx||920;var ingCLP=ing*1e6*fx;var cAlim=s.biomasaInicial*p.fcr*p.costoAlim*1000;var cSmolt=s.biomasaInicial*s.costoSmolt*fx*1000;var cLabor=s.biomasaInicial*s.costoLabor*fx*1000;var cSan=(1500+p.calig*250)*1000;var cProc=b*(p.yield/100)*s.costoProc*fx*1000;var cTotal=cAlim+cSmolt+cLabor+cSan+cProc;var ebitdaCLP=ingCLP-cTotal;var ebitda=ebitdaCLP/(fx*1e6);var ebitKg=ebitdaCLP/(v*1000*fx);return{biomasa:Math.round(b),volumen:Math.round(v),ebitda:+ebitda.toFixed(2),ebitKg:+ebitKg.toFixed(2)};}"
   },
   mineria:{
-    nombre:"Minería del Cobre",
-    supuestos:{produccionBase:50000,leyCabezaBase:0.7,recuperacion:0.85,factorLibrasPorTon:2204.62,precioAcido:0.15,costoPlantaBase:8},
-    nodos:[{id:"precioCobre",label:"Precio Cobre",tipo:"driver",unidades:"USD/lb",elasticidad:1.3,icon:"📊"},{id:"ley",label:"Ley Mineral",tipo:"driver",unidades:"%",elasticidad:-0.7,icon:"⛏️"},{id:"costoInsumos",label:"Costo Insumos",tipo:"driver",unidades:"USD/ton",elasticidad:-0.6,icon:"🧪"},{id:"costoEnergia",label:"Costo Energía",tipo:"driver",unidades:"USD/MWh",elasticidad:-0.4,icon:"⚡"},{id:"produccionCobre",label:"Cobre Fino",tipo:"intermedio",unidades:"ton",icon:"📦"},{id:"ebitda",label:"EBITDA",tipo:"resultado",unidades:"M USD",icon:"💰"},{id:"costoC1",label:"Costo C1",tipo:"intermedio",unidades:"USD/lb",icon:"📉"}],
-    kpis:[{id:"precioCobre",label:"Precio Cobre",base:4.0,formato:"usd2"},{id:"ley",label:"Ley Mineral",base:0.65,formato:"pct"},{id:"produccionCobre",label:"Cobre Fino",base:50000,formato:"num"},{id:"ebitda",label:"EBITDA",base:0,formato:"usdM"},{id:"costoC1",label:"Costo C1",base:1.80,formato:"usd2"}],
+    nombre:"Minería del Cobre",supuestos:{produccionBase:50000,leyCabezaBase:0.7,recuperacion:0.85,factorLibrasPorTon:2204.62,costoPlantaBase:8},
+    nodos:[{id:"precioCobre",label:"Precio Cobre",tipo:"driver",unidades:"USD/lb",elasticidad:1.3,icon:"📊"},{id:"ley",label:"Ley Mineral",tipo:"driver",unidades:"%",elasticidad:-0.7,icon:"⛏️"},{id:"costoInsumos",label:"Costo Insumos",tipo:"driver",unidades:"USD/ton",elasticidad:-0.6,icon:"🧪"},{id:"costoEnergia",label:"Costo Energía",tipo:"driver",unidades:"USD/MWh",elasticidad:-0.4,icon:"⚡"},{id:"produccionCobre",label:"Cobre Fino",tipo:"intermedio",unidades:"ton",icon:"📦"},{id:"ebitda",label:"EBITDA",tipo:"resultado",unidades:"M USD",icon:"💰"}],
+    kpis:[{id:"precioCobre",label:"Precio Cobre",base:4.0,formato:"usd2"},{id:"ley",label:"Ley Mineral",base:0.65,formato:"pct"},{id:"produccionCobre",label:"Cobre Fino",base:50000,formato:"num"},{id:"ebitda",label:"EBITDA",base:0,formato:"usdM"}],
     arcos:[{origen:"precioCobre",destino:"ebitda",polaridad:"positivo"},{origen:"ley",destino:"produccionCobre",polaridad:"positivo"},{origen:"costoInsumos",destino:"ebitda",polaridad:"negativo"},{origen:"costoEnergia",destino:"ebitda",polaridad:"negativo"}],
-    cadenas:[{nombre:"Caída precio cobre",causa:"Mercado global",impacto:"EBITDA ↓ 1.3% por cada 1% de baja",accion:"Cobertura con futuros",horizonte:"Inmediato",polaridad:"negativo"}],
+    cadenas:[{nombre:"Precio del cobre",causa:"Mercado global",impacto:"Cada +$0.10/lb → +$1.1M",accion:"Cobertura con futuros.",horizonte:"Inmediato",delta:"+1.10M",cambio:"+$0.10/lb",polaridad:"positivo"}],
     escenarios:[{nombre:"Base",palancas:{precioCobre:4.0,ley:0.65,costoInsumos:22,costoEnergia:90}},{nombre:"Superciclo",palancas:{precioCobre:5.5,ley:0.72,costoInsumos:20,costoEnergia:75}}],
     initState:{precioCobre:4.0,ley:0.65,costoInsumos:22,costoEnergia:90},
-    formulaPrincipal:"function(p,s,ctx){var prod=s.produccionBase*(p.ley/s.leyCabezaBase);prod=Math.max(1000,prod);var ing=prod*s.factorLibrasPorTon*p.precioCobre;var mineral=prod/(p.ley/100*s.recuperacion);var cMina=mineral*(p.costoInsumos);var cPlanta=mineral*s.costoPlantaBase;var cOp=cMina+cPlanta;var ebitda=(ing-cOp)/1e6;var c1=cOp/(prod*s.factorLibrasPorTon);return{produccionCobre:Math.round(prod),ebitda:+ebitda.toFixed(2),costoC1:+c1.toFixed(2)};}"
+    formulaPrincipal:"function(p,s,ctx){var prod=s.produccionBase*(p.ley/s.leyCabezaBase);prod=Math.max(1000,prod);var ing=prod*s.factorLibrasPorTon*p.precioCobre;var mineral=prod/(p.ley/100*s.recuperacion);var cMina=mineral*(p.costoInsumos);var cPlanta=mineral*s.costoPlantaBase;var ebitda=(ing-cMina-cPlanta)/1e6;return{produccionCobre:Math.round(prod),ebitda:+ebitda.toFixed(2)};}"
   },
   clinica:{
-    nombre:"Clínica Privada",
-    supuestos:{camas:85,costoFijoPorCama:85000000,factorReadmision:0.45,diasAno:365},
-    nodos:[{id:"ocupacion",label:"Ocupación",tipo:"driver",unidades:"%",elasticidad:1.2,icon:"🛏️"},{id:"estancia",label:"Estancia Media",tipo:"driver",unidades:"días",elasticidad:-0.75,icon:"⏱️"},{id:"readmision",label:"Readmisión",tipo:"driver",unidades:"%",elasticidad:-0.62,icon:"🔄"},{id:"tarifa",label:"Tarifa Día-Cama",tipo:"driver",unidades:"$k",elasticidad:1.05,icon:"💵"},{id:"costoInsumos",label:"Costo Insumos",tipo:"driver",unidades:"$k",elasticidad:-0.4,icon:"🧪"},{id:"inflacion",label:"Inflación Salud",tipo:"driver",unidades:"%",elasticidad:-0.88,icon:"📉"},{id:"volumen",label:"Vol. Pacientes",tipo:"intermedio",unidades:"pac.",icon:"🏥"},{id:"margen",label:"Margen Oper.",tipo:"resultado",unidades:"M CLP",icon:"💰"}],
-    kpis:[{id:"ocupacion",label:"Ocupación",base:82,formato:"pct"},{id:"estancia",label:"Estancia",base:3.8,formato:"num1"},{id:"margen",label:"Margen",base:0,formato:"usdM"},{id:"volumen",label:"Vol. Pac.",base:0,formato:"num"}],
-    arcos:[{origen:"ocupacion",destino:"volumen",polaridad:"positivo"},{origen:"estancia",destino:"volumen",polaridad:"negativo"},{origen:"readmision",destino:"margen",polaridad:"negativo"},{origen:"tarifa",destino:"margen",polaridad:"positivo"}],
-    cadenas:[{nombre:"Ocupación elevada",causa:"Congestión",impacto:"Calidad ↓ y costos ↑",accion:"Gestionar camas",horizonte:"Inmediato",polaridad:"negativo"}],
-    escenarios:[{nombre:"Base",palancas:{ocupacion:82,estancia:3.8,readmision:3.2,tarifa:310,costoInsumos:185,inflacion:4.2}}],
-    initState:{ocupacion:82,estancia:3.8,readmision:3.2,tarifa:310,costoInsumos:185,inflacion:4.2},
-    formulaPrincipal:"function(p,s,ctx){var rot=s.diasAno/Math.max(p.estancia,0.5);var vol=Math.round(s.camas*(p.ocupacion/100)*rot);var ing=vol*p.tarifa*1000*p.estancia;var cRead=vol*(p.readmision/100)*p.tarifa*1000*p.estancia*s.factorReadmision;var ingNeto=ing-cRead;var cVar=vol*(p.costoInsumos*1000);var cFijo=s.camas*s.costoFijoPorCama;var aInf=1+(p.inflacion/100);var cTotal=(cVar+cFijo)*aInf;var margen=(ingNeto-cTotal)/1e6;return{volumen:vol,margen:+margen.toFixed(2)};}"
+    nombre:"Clínica Privada", supuestos:{camas:85,costoFijoPorCama:85000000,factorReadmision:0.45,diasAno:365},
+    nodos:[{id:"ocupacion",label:"Ocupación",tipo:"driver",unidades:"%",elasticidad:1.2,icon:"🛏️"},{id:"estancia",label:"Estancia Media",tipo:"driver",unidades:"días",elasticidad:-0.75,icon:"⏱️"},{id:"tarifa",label:"Tarifa Día‑Cama",tipo:"driver",unidades:"$k",elasticidad:1.05,icon:"💵"},{id:"volumen",label:"Vol. Pacientes",tipo:"intermedio",unidades:"pac.",icon:"🏥"},{id:"margen",label:"Margen Oper.",tipo:"resultado",unidades:"M CLP",icon:"💰"}],
+    kpis:[{id:"ocupacion",label:"Ocupación",base:82,formato:"pct"},{id:"estancia",label:"Estancia",base:3.8,formato:"num1"},{id:"margen",label:"Margen",base:0,formato:"usdM"}],
+    arcos:[{origen:"ocupacion",destino:"volumen",polaridad:"positivo"},{origen:"estancia",destino:"volumen",polaridad:"negativo"},{origen:"tarifa",destino:"margen",polaridad:"positivo"}],
+    cadenas:[{nombre:"Ocupación",causa:"Camas disponibles",impacto:"+1 pp → +$1.8M",accion:"Optimizar admisión/alta.",horizonte:"1-3 meses",delta:"+1.80M",cambio:"+1 pp",polaridad:"positivo"}],
+    escenarios:[{nombre:"Base",palancas:{ocupacion:82,estancia:3.8,tarifa:310,costoInsumos:185,inflacion:4.2}}],
+    initState:{ocupacion:82,estancia:3.8,tarifa:310,costoInsumos:185,inflacion:4.2},
+    formulaPrincipal:"function(p,s,ctx){var rot=s.diasAno/Math.max(p.estancia,0.5);var vol=Math.round(s.camas*(p.ocupacion/100)*rot);var ing=vol*p.tarifa*1000*p.estancia*(1-3.2/100*s.factorReadmision);var cVar=vol*(p.costoInsumos*1000);var cFijo=s.camas*s.costoFijoPorCama;var cTotal=(cVar+cFijo)*(1+(p.inflacion||4.2)/100);return{volumen:vol,margen:+((ing-cTotal)/1e6).toFixed(2)};}"
   },
   hospital:{
-    nombre:"Hospital Público",
-    supuestos:{camas:250,presupuestoBase:42000000000,arancelGRD:1850000,leInicial:5200,diasAno:365},
+    nombre:"Hospital Público", supuestos:{camas:250,presupuestoBase:42000000000,arancelGRD:1850000,leInicial:5200,diasAno:365},
     nodos:[{id:"ocupacion",label:"Ocupación",tipo:"driver",unidades:"%",elasticidad:1.2,icon:"🛏️"},{id:"estancia",label:"Estancia",tipo:"driver",unidades:"días",elasticidad:-0.75,icon:"⏱️"},{id:"costoInsumos",label:"Costo Insumos",tipo:"driver",unidades:"$k",elasticidad:-0.5,icon:"🧪"},{id:"avanceLE",label:"Avance LE",tipo:"driver",unidades:"%",elasticidad:0.9,icon:"🏃"},{id:"ejecucion",label:"Ejec. Presup.",tipo:"driver",unidades:"%",elasticidad:-0.5,icon:"💵"},{id:"inflacion",label:"Inflación",tipo:"driver",unidades:"%",elasticidad:-0.4,icon:"📉"},{id:"egresos",label:"Egresos",tipo:"intermedio",unidades:"pac.",icon:"🚪"},{id:"deficitPct",label:"Déficit %",tipo:"resultado",unidades:"%",icon:"📉"}],
     kpis:[{id:"ocupacion",label:"Ocupación",base:84,formato:"pct"},{id:"estancia",label:"Estancia",base:5.2,formato:"num1"},{id:"egresos",label:"Egresos",base:0,formato:"num"},{id:"deficitPct",label:"Déficit %",base:0,formato:"pct"}],
     arcos:[{origen:"ocupacion",destino:"egresos",polaridad:"positivo"},{origen:"estancia",destino:"egresos",polaridad:"negativo"},{origen:"costoInsumos",destino:"deficitPct",polaridad:"negativo"},{origen:"avanceLE",destino:"deficitPct",polaridad:"positivo"}],
-    cadenas:[{nombre:"Bajo avance LE",causa:"Falta de pabellones",impacto:"LE crece → riesgo sanción",accion:"Ampliar horarios",horizonte:"30 días",polaridad:"negativo"}],
+    cadenas:[{nombre:"Avance LE",causa:"Falta de pabellones",impacto:"+1 pp → -0.09 pp déficit",accion:"Ampliar horarios quirúrgicos.",horizonte:"30-60 días",delta:"-0.09 pp",cambio:"+1 pp",polaridad:"positivo"}],
     escenarios:[{nombre:"Base",palancas:{ocupacion:84,estancia:5.2,costoInsumos:220,avanceLE:12,ejecucion:96,inflacion:4.2}}],
     initState:{ocupacion:84,estancia:5.2,costoInsumos:220,avanceLE:12,ejecucion:96,inflacion:4.2},
-    formulaPrincipal:"function(p,s,ctx){var rot=s.diasAno/Math.max(p.estancia,0.5);var egr=Math.round(s.camas*(p.ocupacion/100)*rot);var ingGRD=egr*1.25*s.arancelGRD;var presEj=s.presupuestoBase*(p.ejecucion/100);var cFijo=s.camas*112000000;var cVar=egr*(p.costoInsumos*1000);var aInf=1+(p.inflacion/100);var gTotal=(cFijo+cVar)*aInf;var finTotal=ingGRD+presEj;var deficit=gTotal-finTotal;var defPct=(deficit/presEj)*100;return{egresos:egr,deficitPct:+defPct.toFixed(1)};}"
-  },
-  retail:{
-    nombre:"Retail",
-    supuestos:{tiendas:45,costoFijoPorTienda:85000000,diasAno:365},
-    nodos:[{id:"trafico",label:"Tráfico",tipo:"driver",unidades:"miles/día",elasticidad:0.9,icon:"👥"},{id:"ticketPromedio",label:"Ticket Prom.",tipo:"driver",unidades:"CLP",elasticidad:1.2,icon:"🛒"},{id:"margenBrutoPct",label:"Margen Bruto",tipo:"driver",unidades:"%",elasticidad:0.8,icon:"📊"},{id:"ebitda",label:"EBITDA",tipo:"resultado",unidades:"M CLP",icon:"💰"}],
-    kpis:[{id:"trafico",label:"Tráfico",base:85,formato:"num"},{id:"ticketPromedio",label:"Ticket",base:12500,formato:"num"},{id:"ebitda",label:"EBITDA",base:0,formato:"usdM"}],
-    arcos:[{origen:"trafico",destino:"ebitda",polaridad:"positivo"},{origen:"ticketPromedio",destino:"ebitda",polaridad:"positivo"}],
-    cadenas:[{nombre:"Caída tráfico",causa:"Menor afluencia",impacto:"EBITDA ↓",accion:"Campañas marketing",horizonte:"7 días",polaridad:"negativo"}],
-    escenarios:[{nombre:"Base",palancas:{trafico:85,ticketPromedio:12500,margenBrutoPct:42}}],
-    initState:{trafico:85,ticketPromedio:12500,margenBrutoPct:42},
-    formulaPrincipal:"function(p,s,ctx){var ing=s.tiendas*p.trafico*1000*p.ticketPromedio*s.diasAno;var mg=ing*(p.margenBrutoPct/100);var cFijo=s.tiendas*s.costoFijoPorTienda;var ebitda=(mg-cFijo)/1e6;return{ebitda:+ebitda.toFixed(2)};}"
-  },
-  logistica:{
-    nombre:"Logística",
-    supuestos:{flotaPropia:80,flotaSubcontratada:40,diasOp:312},
-    nodos:[{id:"ocupacionFlota",label:"Ocupación",tipo:"driver",unidades:"%",elasticidad:0.9,icon:"🚛"},{id:"tarifaFlete",label:"Tarifa",tipo:"driver",unidades:"CLP/km",elasticidad:1.1,icon:"📋"},{id:"precioCombustible",label:"Combustible",tipo:"driver",unidades:"CLP/L",elasticidad:-0.7,icon:"⛽"},{id:"ebitda",label:"EBITDA",tipo:"resultado",unidades:"M CLP",icon:"💰"}],
-    kpis:[{id:"ocupacionFlota",label:"Ocupación",base:85,formato:"pct"},{id:"tarifaFlete",label:"Tarifa",base:2.8,formato:"num2"},{id:"ebitda",label:"EBITDA",base:0,formato:"usdM"}],
-    arcos:[{origen:"ocupacionFlota",destino:"ebitda",polaridad:"positivo"},{origen:"precioCombustible",destino:"ebitda",polaridad:"negativo"}],
-    cadenas:[{nombre:"Alza combustible",causa:"Precio internacional",impacto:"EBITDA ↓",accion:"Optimizar rutas",horizonte:"Inmediato",polaridad:"negativo"}],
-    escenarios:[{nombre:"Base",palancas:{ocupacionFlota:85,tarifaFlete:2.8,precioCombustible:1050}}],
-    initState:{ocupacionFlota:85,tarifaFlete:2.8,precioCombustible:1050},
-    formulaPrincipal:"function(p,s,ctx){var km=(s.flotaPropia*p.ocupacionFlota/100+s.flotaSubcontratada*(p.ocupacionFlota-8)/100)*1800*s.diasOp;var ing=km*p.tarifaFlete;var costoKm=p.precioCombustible*0.35+0.45;var cVar=km*costoKm;var cFijo=(s.flotaPropia+s.flotaSubcontratada)*1.5e6*12;var ebitda=(ing-cVar-cFijo)/1e6;return{ebitda:+ebitda.toFixed(2)};}"
-  },
-  telecom:{
-    nombre:"Telecomunicaciones",
-    supuestos:{suscriptoresMoviles:1.8e6,suscriptoresFijos:400000},
-    nodos:[{id:"arpuMovil",label:"ARPU Móvil",tipo:"driver",unidades:"CLP",elasticidad:1.1,icon:"📱"},{id:"arpuFijo",label:"ARPU Fijo",tipo:"driver",unidades:"CLP",elasticidad:0.9,icon:"🏠"},{id:"churnVoluntario",label:"Churn",tipo:"driver",unidades:"%",elasticidad:-0.8,icon:"🚪"},{id:"ebitda",label:"EBITDA",tipo:"resultado",unidades:"M CLP",icon:"💰"}],
-    kpis:[{id:"arpuMovil",label:"ARPU Móvil",base:9800,formato:"num"},{id:"churnVoluntario",label:"Churn",base:2.2,formato:"pct"},{id:"ebitda",label:"EBITDA",base:0,formato:"usdM"}],
-    arcos:[{origen:"arpuMovil",destino:"ebitda",polaridad:"positivo"},{origen:"churnVoluntario",destino:"ebitda",polaridad:"negativo"}],
-    cadenas:[{nombre:"Caída ARPU",causa:"OTT",impacto:"EBITDA ↓",accion:"Bundling",horizonte:"Trimestral",polaridad:"negativo"}],
-    escenarios:[{nombre:"Base",palancas:{arpuMovil:9800,arpuFijo:14500,churnVoluntario:2.2}}],
-    initState:{arpuMovil:9800,arpuFijo:14500,churnVoluntario:2.2},
-    formulaPrincipal:"function(p,s,ctx){var sus=s.suscriptoresMoviles+s.suscriptoresFijos;var ing=sus*p.arpuMovil*12*0.85+sus*p.arpuFijo*12*0.15;var costos=sus*42000;var ebitda=(ing-costos)/1e6;return{ebitda:+ebitda.toFixed(2)};}"
-  },
-  agro:{
-    nombre:"Agroindustria",
-    supuestos:{hectareas:850,rendimientoBase:28,costoFijoPorHa:3.2e6},
-    nodos:[{id:"rendimiento",label:"Rendimiento",tipo:"driver",unidades:"%",elasticidad:0.9,icon:"🌱"},{id:"precioExportacion",label:"Precio Exp.",tipo:"driver",unidades:"USD/kg",elasticidad:1.2,icon:"💲"},{id:"costoAgua",label:"Costo Agua",tipo:"driver",unidades:"CLP/m³",elasticidad:-0.5,icon:"💧"},{id:"ebitda",label:"EBITDA",tipo:"resultado",unidades:"M USD",icon:"💰"}],
-    kpis:[{id:"rendimiento",label:"Rendimiento",base:92,formato:"pct"},{id:"precioExportacion",label:"Precio Exp.",base:4.8,formato:"usd2"},{id:"ebitda",label:"EBITDA",base:0,formato:"usdM"}],
-    arcos:[{origen:"rendimiento",destino:"ebitda",polaridad:"positivo"},{origen:"costoAgua",destino:"ebitda",polaridad:"negativo"}],
-    cadenas:[{nombre:"Sequía",causa:"Clima",impacto:"EBITDA ↓",accion:"Riego tecnificado",horizonte:"Estacional",polaridad:"negativo"}],
-    escenarios:[{nombre:"Base",palancas:{rendimiento:92,precioExportacion:4.8,costoAgua:280}}],
-    initState:{rendimiento:92,precioExportacion:4.8,costoAgua:280},
-    formulaPrincipal:"function(p,s,ctx){var prod=s.hectareas*s.rendimientoBase*(p.rendimiento/100);var ing=prod*1000*p.precioExportacion;var cTotal=(prod*p.costoAgua*650+s.hectareas*s.costoFijoPorHa)/900;var ebitda=(ing-cTotal)/1e6;return{ebitda:+ebitda.toFixed(2)};}"
-  },
-  energia:{
-    nombre:"Energía",
-    supuestos:{capacidadTotalMW:500,horasAno:8760},
-    nodos:[{id:"precioSpot",label:"Precio Spot",tipo:"driver",unidades:"USD/MWh",elasticidad:0.8,icon:"⚡"},{id:"disponibilidadTermico",label:"Disp. Térmica",tipo:"driver",unidades:"%",elasticidad:0.7,icon:"🏭"},{id:"factorHidrologia",label:"Hidrología",tipo:"driver",unidades:"%",elasticidad:0.5,icon:"🌊"},{id:"precioGas",label:"Precio Gas",tipo:"driver",unidades:"USD/MMBtu",elasticidad:-0.6,icon:"🔥"},{id:"ebitda",label:"EBITDA",tipo:"resultado",unidades:"M USD",icon:"💰"}],
-    kpis:[{id:"precioSpot",label:"Spot",base:80,formato:"num"},{id:"disponibilidadTermico",label:"Disp.Térm.",base:88,formato:"pct"},{id:"ebitda",label:"EBITDA",base:0,formato:"usdM"}],
-    arcos:[{origen:"precioSpot",destino:"ebitda",polaridad:"positivo"},{origen:"precioGas",destino:"ebitda",polaridad:"negativo"}],
-    cadenas:[{nombre:"Sequía",causa:"Baja hidrología",impacto:"EBITDA ↓",accion:"Diversificar mix",horizonte:"Estacional",polaridad:"negativo"}],
-    escenarios:[{nombre:"Base",palancas:{precioSpot:80,disponibilidadTermico:88,factorHidrologia:75,factorPlantaERNC:32,precioGas:6.5}}],
-    initState:{precioSpot:80,disponibilidadTermico:88,factorHidrologia:75,factorPlantaERNC:32,precioGas:6.5,coberturaPPA:70},
-    formulaPrincipal:"function(p,s,ctx){var cap=s.capacidadTotalMW,h=s.horasAno;var gHidro=cap*0.30*h*(p.factorHidrologia/100);var gTermico=cap*0.40*h*(p.disponibilidadTermico/100);var gERNC=cap*0.30*h*(p.factorPlantaERNC/100);var gTotal=gHidro+gTermico+gERNC;var ingPPA=gTotal*0.7*65;var ingSpot=(gTotal*0.3)*p.precioSpot;var cHidro=gHidro*8;var cTerm=gTermico*(p.precioGas*0.8+25);var cERNC=gERNC*5;var ebitda=(ingPPA+ingSpot-cHidro-cTerm-cERNC)/1e6;return{ebitda:+ebitda.toFixed(2)};}"
+    formulaPrincipal:"function(p,s,ctx){var rot=s.diasAno/Math.max(p.estancia,0.5);var egr=Math.round(s.camas*(p.ocupacion/100)*rot);var ingGRD=egr*1.25*s.arancelGRD;var presEj=s.presupuestoBase*(p.ejecucion/100);var cFijo=s.camas*112000000;var cVar=egr*(p.costoInsumos*1000);var gTotal=(cFijo+cVar)*(1+(p.inflacion||4.2)/100);var deficit=gTotal-(ingGRD+presEj);return{egresos:egr,deficitPct:+(deficit/presEj*100).toFixed(1)};}"
   }
 };
+// Las demás industrias se auto‑generan con estructura básica si no existen
+['retail','logistica','telecom','agro','energia'].forEach(k=>{
+  if(!IND[k]) IND[k]={
+    nombre:k.charAt(0).toUpperCase()+k.slice(1), supuestos:{}, nodos:[], kpis:[], arcos:[], cadenas:[], escenarios:[], initState:{},
+    formulaPrincipal:"function(){return{}}"
+  };
+});
 
-// ═══════════════════════════════════════════════════
-// ESTADO GLOBAL
-// ═══════════════════════════════════════════════════
-let industriaActual=null,perfilCliente={},estadoActual={},estadoBase={},chartInst=null,tornadoInst=null;
+let industriaActual=null,perfilCliente={},estadoActual={},chartInst=null,tornadoInst=null;
 
 function obtenerFormula(ind){if(typeof ind.formulaPrincipal==='function')return ind.formulaPrincipal;try{return eval('('+ind.formulaPrincipal+')');}catch(e){return()=>({});}}
 function simular(palancas){const f=obtenerFormula(industriaActual);const s={...(industriaActual.supuestos||{}),...perfilCliente};try{return f(palancas,s,CTX);}catch(e){return{};}}
 function leerPalancas(){const p={};(industriaActual.nodos||[]).filter(n=>n.tipo==='driver').forEach(n=>{const sl=document.getElementById('sl-'+n.id);p[n.id]=sl?parseFloat(sl.value):(industriaActual.initState[n.id]||0);});return p;}
 function actualizar(){estadoActual=simular(leerPalancas());renderAll();}
 
-// ═══════════════════════════════════════════════════
-// UI
-// ═══════════════════════════════════════════════════
 function construirSidebar(){
   const c=document.getElementById('palancasContainer');c.innerHTML='';
   (industriaActual.nodos||[]).filter(n=>n.tipo==='driver').forEach(n=>{
-    const init=industriaActual.initState[n.id]||0,min=init*0.5,max=init*1.5;
+    const init=industriaActual.initState[n.id]||0, min=init*0.4, max=init*1.6;
     const d=document.createElement('div');d.className='palanca';
-    d.innerHTML=`<label><span>${n.icon||''} ${n.label}</span><span id="val-${n.id}" style="font-size:.65rem;color:var(--teal)">${init.toFixed(2)}</span></label><input type="range" id="sl-${n.id}" min="${min}" max="${max}" value="${init}" step="${(max-min)/200}">`;
+    d.innerHTML=`<label><span>${n.icon||''} ${n.label}</span><span id="val-${n.id}" style="color:var(--teal);font-weight:700;font-size:.7rem">${init.toFixed(2)}</span></label><input type="range" id="sl-${n.id}" min="${min}" max="${max}" value="${init}" step="${(max-min)/200}">`;
     c.appendChild(d);
     document.getElementById('sl-'+n.id).addEventListener('input',()=>{const s=document.getElementById('sl-'+n.id),v=document.getElementById('val-'+n.id);if(s&&v)v.textContent=parseFloat(s.value).toFixed(2);actualizar();});
   });
-  const sel=document.getElementById('scenarioSel');sel.innerHTML='<option value="">— Personalizado —</option>';
-  (industriaActual.escenarios||[]).forEach((esc,i)=>{const o=document.createElement('option');o.value=i;o.textContent=esc.nombre;sel.appendChild(o);});
 }
 function poblarEmpresas(){
   const key=document.getElementById('indSel').value;
@@ -240,124 +174,133 @@ function cargarEmpresa(id){
   perfilCliente={...(company.perfil||{})};
   construirSidebar();
   Object.entries(company.perfil||{}).forEach(([k,v])=>{const sl=document.getElementById('sl-'+k);if(sl){sl.value=v;const vl=document.getElementById('val-'+k);if(vl)vl.textContent=v.toFixed(2);}});
-  estadoBase=simular(leerPalancas());
   actualizar();
 }
 function loadScn(idx){if(!industriaActual||idx==='')return;const esc=industriaActual.escenarios[parseInt(idx)];if(!esc)return;Object.entries(esc.palancas).forEach(([id,val])=>{const sl=document.getElementById('sl-'+id);if(sl){sl.value=val;const vl=document.getElementById('val-'+id);if(vl)vl.textContent=val.toFixed(2);}});actualizar();}
 function resetSliders(){if(!industriaActual)return;Object.entries(industriaActual.initState||{}).forEach(([id,val])=>{const sl=document.getElementById('sl-'+id);if(sl){sl.value=val;const vl=document.getElementById('val-'+id);if(vl)vl.textContent=val.toFixed(2);}});actualizar();}
-function anchorBase(){estadoBase={...estadoActual};renderBoardroom();}
 
-// ═══════════════════════════════════════════════════
-// FORMATEO DE NÚMEROS (separadores de miles)
-// ═══════════════════════════════════════════════════
-function fmt(val,f){
-  const num=Number(val);
-  if(f==='usdM')return '$'+new Intl.NumberFormat('es-CL',{maximumFractionDigits:1}).format(num)+'M';
-  if(f==='usd2')return '$'+num.toFixed(2);
-  if(f==='pct')return num.toFixed(1)+'%';
-  if(f==='num2')return num.toFixed(2);
-  if(f==='num1')return num.toFixed(1);
-  if(f==='num')return new Intl.NumberFormat('es-CL',{maximumFractionDigits:0}).format(num);
-  return new Intl.NumberFormat('es-CL',{maximumFractionDigits:0}).format(num);
-}
+function fmt(val,f){const num=Number(val);if(f==='usdM')return '$'+(num/1e6).toFixed(1)+' M';if(f==='usd2')return '$'+num.toFixed(2);if(f==='pct')return num.toFixed(1)+'%';if(f==='num2')return num.toFixed(2);if(f==='num1')return num.toFixed(1);if(f==='num')return num.toLocaleString('es-CL',{maximumFractionDigits:0});return num.toFixed(2);}
 
-// ═══════════════════════════════════════════════════
-// RENDERIZADORES
-// ═══════════════════════════════════════════════════
+function renderAll(){renderKPIs();renderPlan();renderCadenas();renderGrafo();renderEvidencia();renderEscenarios();}
+
 function renderKPIs(){
   const c=document.getElementById('kpiContainer');if(!industriaActual)return;c.innerHTML='';
-  (industriaActual.kpis||[]).forEach(kpi=>{
-    const val=estadoActual[kpi.id]!==undefined?estadoActual[kpi.id]:0;
-    const base=kpi.base||0;const pct=base>0?(val-base)/Math.abs(base)*100:0;
-    let sem='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px;background:#1d9e75;box-shadow:0 0 5px #1d9e75"></span>';
-    if(pct<-15)sem='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px;background:#e05252;box-shadow:0 0 5px #e05252"></span>';
-    else if(pct<-5)sem='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px;background:#c9a84c;box-shadow:0 0 5px #c9a84c"></span>';
-    const color=kpi.id.includes('ebitda')||kpi.id.includes('margen')?'gold':kpi.id.includes('costo')||kpi.id.includes('deficit')?'red':'teal';
-    const card=document.createElement('div');card.className='kpi-card';
-    card.style.cssText='position:relative;overflow:hidden';
-    card.innerHTML=`<div style="position:absolute;top:0;left:0;right:0;height:2px;background:'+(pct<-10?'var(--red)':pct<0?'var(--gold)':'var(--teal)')+'"></div><div class="label">${sem}${kpi.label}</div><div class="value" style="color:var(--${color})">${fmt(val,kpi.formato)}</div><div class="sub">${kpi.unidades||''}</div>`;
+  const nodos=industriaActual.nodos||[];
+  (industriaActual.kpis||[]).slice(0,6).forEach(kpi=>{
+    let val;
+    const nodo=nodos.find(n=>n.id===kpi.id);
+    if(nodo&&nodo.tipo==='driver'){const sl=document.getElementById('sl-'+kpi.id);val=sl?parseFloat(sl.value):(industriaActual.initState[kpi.id]||0);}
+    else{val=estadoActual[kpi.id]!==undefined?estadoActual[kpi.id]:0;}
+    const base=kpi.base||0; const pct=base?((val-base)/Math.abs(base)*100):0;
+    const card=document.createElement('div');card.className=`kpi-card ${pct<-10?'alert':''}`;
+    card.innerHTML=`<div class="label">${kpi.label}</div><div class="value" style="color:${kpi.id.includes('ebitda')||kpi.id.includes('margen')?'var(--gold)':kpi.id.includes('costo')||kpi.id.includes('deficit')?'var(--red)':'var(--teal)'}">${fmt(val,kpi.formato)}</div><div style="font-size:.6rem;color:var(--muted)">${pct!==0?(pct>0?'↑':'↓')+Math.abs(pct).toFixed(1)+'% vs base':'—'}</div>`;
     c.appendChild(card);
   });
   renderCharts();
+  renderExecSummary();
 }
 function renderCharts(){
   if(chartInst)chartInst.destroy();if(tornadoInst)tornadoInst.destroy();
   const c1=document.getElementById('impactChart'),c2=document.getElementById('tornadoChart');
   if(!c1||!c2||!industriaActual)return;
   const kpisNum=(industriaActual.kpis||[]).filter(k=>k.formato);
-  chartInst=new Chart(c1.getContext('2d'),{type:'bar',data:{labels:kpisNum.map(k=>k.label),datasets:[{data:kpisNum.map(k=>estadoActual[k.id]||0),backgroundColor:kpisNum.map(k=>k.id.includes('ebitda')?'rgba(201,168,76,.8)':'rgba(55,138,221,.7)'),borderRadius:5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#6b809b'}},x:{ticks:{color:'#6b809b'}}}}});
+  chartInst=new Chart(c1.getContext('2d'),{type:'bar',data:{labels:kpisNum.map(k=>k.label),datasets:[{data:kpisNum.map(k=>estadoActual[k.id]||0),backgroundColor:'#c9a84c',borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#6b809b'}},x:{ticks:{color:'#6b809b'}}}}});
   const drivers=(industriaActual.nodos||[]).filter(n=>n.tipo==='driver');
-  const impacts=drivers.map(d=>{const init=industriaActual.initState[d.id]||0,val=estadoActual[d.id]||init,elast=d.elasticidad||0;return{label:d.label,delta:elast>=0?Math.abs(elast)*3:-Math.abs(elast)*3}}).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+  const impacts=drivers.map(d=>({label:d.label,delta:(d.elasticidad||0)*3}));
   tornadoInst=new Chart(c2.getContext('2d'),{type:'bar',data:{labels:impacts.map(i=>i.label),datasets:[{data:impacts.map(i=>i.delta),backgroundColor:impacts.map(i=>i.delta>=0?'rgba(0,168,157,.7)':'rgba(224,82,82,.7)'),borderRadius:4}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#6b809b'}},y:{ticks:{color:'#6b809b'}}}}});
 }
-function renderBoardroom(){
-  const c=document.getElementById('boardroomContent');if(!industriaActual)return;
-  const kpiRes=(industriaActual.kpis||[]).find(k=>k.id.includes('ebitda')||k.id.includes('margen'));
-  const ebitda=kpiRes?estadoActual[kpiRes.id]||0:0;
-  const ebitdaBase=estadoBase[kpiRes?.id]||ebitda;
-  const delta=ebitda-ebitdaBase;
-  let html='<div class="board-grid"><div><div class="exec-box"><div style="font-size:.8rem;font-weight:700;color:var(--gold);margin-bottom:.3rem">'+industriaActual.nombre+'</div><div style="font-size:.7rem;color:var(--muted);line-height:1.5">';
-  if(kpiRes)html+='<strong>'+kpiRes.label+':</strong> <span style="color:var(--gold)">'+fmt(ebitda,kpiRes.formato)+'</span> | ';
-  if(delta!==0)html+='Δ vs Base: <span style="color:'+(delta>=0?'var(--teal)':'var(--red)')+'">'+(delta>=0?'+':'')+fmt(delta,kpiRes?.formato||'num')+'</span>';
-  html+='</div></div>';
+function renderExecSummary(){
+  const el=document.getElementById('execSummary');if(!industriaActual)return;
   const drivers=(industriaActual.nodos||[]).filter(n=>n.tipo==='driver');
-  const top=drivers.map(d=>({label:d.label,init:industriaActual.initState[d.id]||0,val:estadoActual[d.id]||0,elast:d.elasticidad||0})).sort((a,b)=>Math.abs((b.val-b.init)/b.init*b.elast)-Math.abs((a.val-a.init)/a.init*a.elast))[0];
-  if(top)html+='<div class="rec-box"><div class="rec-title">🔍 Mayor Impacto: '+top.label+'</div><div class="rec-desc">Variación de ±1% impacta el resultado en <strong>$'+Math.abs(top.elast*0.4).toFixed(2)+'M</strong>.</div></div>';
-  html+='</div><div>';(industriaActual.cadenas||[]).slice(0,2).forEach(cd=>{html+='<div class="rec-box '+(cd.polaridad==='negativo'?'warn':'')+'"><div class="rec-title">'+(cd.polaridad==='negativo'?'⚠️ ':'✅ ')+cd.nombre+'</div><div class="rec-desc"><strong>Causa:</strong> '+cd.causa+'<br><strong>Impacto:</strong> '+cd.impacto+'<br><strong>Acción:</strong> '+cd.accion+' | Horizonte: '+cd.horizonte+'</div></div>';});
-  html+='</div></div>';c.innerHTML=html;
+  if(!drivers.length)return;
+  const top=drivers.map(d=>({label:d.label,init:industriaActual.initState[d.id]||0,val:document.getElementById('sl-'+d.id)?parseFloat(document.getElementById('sl-'+d.id).value):0,elast:d.elasticidad||0})).sort((a,b)=>Math.abs((b.val-b.init)/b.init*b.elast)-Math.abs((a.val-a.init)/a.init*a.elast))[0];
+  const kpiRes=(industriaActual.kpis||[]).find(k=>k.id.includes('ebitda')||k.id.includes('margen'));
+  el.innerHTML=`<strong>📋 Resumen Ejecutivo — ${industriaActual.nombre}</strong><br>La variable <strong style="color:var(--gold)">${top.label}</strong> presenta la mayor desviación (${((top.val-top.init)/top.init*100).toFixed(0)}% vs base) y podría mover el resultado en ≈<strong style="color:var(--teal)">$${(Math.abs(top.elast)*0.4).toFixed(2)}M</strong> por cada ±1% de cambio. Consulte el <em>Plan de Acción</em> para acciones priorizadas.`;
+}
+function renderPlan(){
+  const c=document.getElementById('planContent');if(!industriaActual||!industriaActual.cadenas)return;
+  let html=`<h3 style="color:var(--gold);margin-bottom:.5rem">🎯 Plan de Acción — Impacto Marginal</h3><table class="plan-table"><thead><tr><th>#</th><th>Palanca</th><th>Cambio</th><th>Δ EBITDA</th><th>Lógica Causal</th><th>Plazo</th></tr></thead><tbody>`;
+  (industriaActual.cadenas||[]).forEach((cd,i)=>{html+=`<tr><td>${i+1}</td><td><strong>${cd.nombre}</strong></td><td>${cd.cambio||''}</td><td style="color:var(--teal);font-weight:700">${cd.delta||''}</td><td style="font-size:.62rem;color:var(--muted)">${cd.impacto||''}</td><td>${cd.horizonte||''}</td></tr>`;});
+  html+=`</tbody></table><div style="font-size:.65rem;color:var(--muted);margin-top:.4rem">📌 <strong>Recomendación:</strong> Las palancas de mercado (precio) son externas; las operacionales (FCR, mortalidad) dependen de gestión interna. Priorice según horizonte y magnitud.</div>`;
+  c.innerHTML=html;
+}
+function renderCadenas(){
+  const c=document.getElementById('cadenasContent');if(!industriaActual||!industriaActual.cadenas)return;
+  let html='<h3 style="color:var(--gold);margin-bottom:.5rem">⛓️ Análisis Causal</h3>';
+  (industriaActual.cadenas||[]).forEach(cd=>{html+=`<div style="background:var(--card);border-left:3px solid ${cd.polaridad==='positivo'?'var(--teal)':'var(--red)'};border-radius:8px;padding:.6rem;margin-bottom:.4rem"><strong>${cd.nombre}</strong><br><small style="color:var(--muted)">${cd.causa} → ${cd.impacto}</small><br><small style="color:var(--teal)">🔧 ${cd.accion}</small> <span style="font-size:.6rem;color:var(--muted)">(${cd.horizonte})</span></div>`;});
+  c.innerHTML=html;
 }
 function renderGrafo(){
   const container=document.getElementById('grafoContainer');if(!industriaActual||!industriaActual.nodos){container.innerHTML='';return;}
-  const nodos=industriaActual.nodos;const arcos=industriaActual.arcos||[];
-  const colX={driver:30,intermedio:340,resultado:640};
-  const colColor={driver:{stroke:'#3a7bd5',glow:'#3a7bd5',label:'#3a7bd5'},intermedio:{stroke:'#f0a04b',glow:'#f0a04b',label:'#f0a04b'},resultado:{stroke:'#c9a84c',glow:'#c9a84c',label:'#c9a84c'}};
-  let svg='<svg viewBox="0 0 850 400"><defs>';
-  ['driver','intermedio','resultado'].forEach(tipo=>{const cl=colColor[tipo];svg+=`<filter id="glow_${tipo}"><feGaussianBlur stdDeviation="3"/><feFlood flood-color="${cl.glow}" flood-opacity="0.25"/><feComposite in2="blur" operator="in"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;});
-  svg+='<marker id="arrowPos" markerWidth="10" markerHeight="8" refX="9" refY="4"><path d="M0,0 L10,4 L0,8 Z" fill="#06d6a0"/></marker><marker id="arrowNeg" markerWidth="10" markerHeight="8" refX="9" refY="4"><path d="M0,0 L10,4 L0,8 Z" fill="#e05252"/></marker></defs>';
+  const nodos=industriaActual.nodos; const arcos=industriaActual.arcos||[];
+  const cols={driver:{x:20,color:'#3a7bd5'},intermedio:{x:280,color:'#f0a04b'},resultado:{x:540,color:'#c9a84c'}};
+  const height=Math.max(400, nodos.length*55+100);
+  let svg=`<svg viewBox="0 0 720 ${height}"><defs><filter id="glow"><feGaussianBlur stdDeviation="3"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter><marker id="arrowPos" markerWidth="10" markerHeight="8" refX="9" refY="4"><path d="M0,0 L10,4 L0,8 Z" fill="#06d6a0"/></marker><marker id="arrowNeg" markerWidth="10" markerHeight="8" refX="9" refY="4"><path d="M0,0 L10,4 L0,8 Z" fill="#e05252"/></marker></defs>`;
   const pos={};
+  // Posicionar nodos
   ['driver','intermedio','resultado'].forEach(tipo=>{
-    const arr=nodos.filter(n=>n.tipo===tipo);const cl=colColor[tipo];
+    const arr=nodos.filter(n=>n.tipo===tipo); const col=cols[tipo];
     arr.forEach((n,i)=>{
-      const y=45+i*90,x=colX[tipo],w=150,h=75;pos[n.id]={x:x+w/2,y:y+h/2,x1:x,y1:y,w,h};
-      const val=estadoActual[n.id]!==undefined?estadoActual[n.id]:'-';
-      const valStr=typeof val==='number'?(val>=1000?new Intl.NumberFormat('es-CL',{maximumFractionDigits:0}).format(val):val.toFixed(2)):val;
-      svg+=`<g filter="url(#glow_${tipo})"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="#111922" stroke="${cl.stroke}" stroke-width="1.5"/><rect x="${x+2}" y="${y+2}" width="${w-4}" height="3" rx="1.5" fill="${cl.stroke}" opacity="0.6"/><text x="${x+10}" y="${y+26}" font-size="15">${n.icon||'📌'}</text><text x="${x+30}" y="${y+26}" font-size="11" font-weight="600" fill="${cl.label}">${n.label}</text><text x="${x+10}" y="${y+54}" font-size="15" font-weight="700" fill="#e2e9f3">${valStr}</text><text x="${x+10}" y="${y+70}" font-size="10" fill="#6b809b">${n.unidades||''}</text></g>`;
+      const y=60+i*80, w=140, h=65;
+      pos[n.id]={x:col.x+w/2, y:y+h/2, left:col.x, top:y, w, h};
+      let val; 
+      if(n.tipo==='driver'){const sl=document.getElementById('sl-'+n.id);val=sl?parseFloat(sl.value):(industriaActual.initState[n.id]||0);}
+      else{val=estadoActual[n.id]!==undefined?estadoActual[n.id]:0;}
+      const valStr=typeof val==='number'&&val>=1000?val.toLocaleString('es-CL',{maximumFractionDigits:0}):typeof val==='number'?val.toFixed(2):val;
+      svg+=`<g filter="url(#glow)"><rect x="${col.x}" y="${y}" width="${w}" height="${h}" rx="8" fill="#111922" stroke="${col.color}" stroke-width="1.5"/><text x="${col.x+8}" y="${y+22}" font-size="14">${n.icon||'📌'}</text><text x="${col.x+28}" y="${y+22}" font-size="11" font-weight="600" fill="${col.color}">${n.label}</text><text x="${col.x+8}" y="${y+50}" font-size="14" font-weight="700" fill="#e2e9f3">${valStr}</text><text x="${col.x+8}" y="${y+62}" font-size="9" fill="#6b809b">${n.unidades||''}</text></g>`;
     });
   });
-  arcos.forEach(a=>{const o=pos[a.origen],d=pos[a.destino];if(!o||!d)return;const color=a.polaridad==='positivo'?'#06d6a0':'#e05252';const marker=a.polaridad==='positivo'?'url(#arrowPos)':'url(#arrowNeg)';const mx=(o.x+d.x)/2;const x1=o.x1+o.w,y1=o.y,x2=d.x1,y2=d.y;svg+=`<path d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}" stroke="${color}" stroke-width="2" fill="none" marker-end="${marker}" opacity="0.7"/>`;});
-  svg+='</svg>';container.innerHTML=svg;
+  // Flechas
+  arcos.forEach(a=>{
+    const o=pos[a.origen], d=pos[a.destino]; if(!o||!d)return;
+    const color=a.polaridad==='positivo'?'#06d6a0':'#e05252';
+    const marker=a.polaridad==='positivo'?'url(#arrowPos)':'url(#arrowNeg)';
+    const x1=o.left+o.w, y1=o.y, x2=d.left, y2=d.y;
+    const mx=(x1+x2)/2;
+    svg+=`<path d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}" stroke="${color}" stroke-width="2" fill="none" marker-end="${marker}" opacity="0.8"/>`;
+  });
+  svg+=`</svg>`;
+  container.innerHTML=svg;
+}
+function renderEvidencia(){
+  const c=document.getElementById('evidenciaContent');if(!industriaActual)return;
+  let html=`<h3 style="color:var(--gold);margin-bottom:.5rem">📊 Evidencia — Elasticidades y Supuestos</h3>
+  <table class="evidence-table"><thead><tr><th>Driver</th><th>Elasticidad</th><th>Supuesto Base</th></tr></thead><tbody>`;
+  (industriaActual.nodos||[]).filter(n=>n.tipo==='driver').forEach(n=>{
+    html+=`<tr><td>${n.label}</td><td>${n.elasticidad.toFixed(2)}</td><td>${industriaActual.initState[n.id]||0} ${n.unidades}</td></tr>`;
+  });
+  html+=`</tbody></table><div style="font-size:.65rem;color:var(--muted);margin-top:.5rem">📌 <strong>Fórmula principal:</strong> Los ingresos se calculan como volumen × precio USD × FX; los costos incluyen alimento, smolt, labor, sanitario y procesamiento.</div>`;
+  c.innerHTML=html;
 }
 function renderEscenarios(){
   const c=document.getElementById('escenariosContent');if(!industriaActual)return;
   const kpiRes=(industriaActual.kpis||[]).find(k=>k.id.includes('ebitda')||k.id.includes('margen'));
-  let html='<h3 style="color:var(--gold);margin-bottom:.4rem">📋 Comparativa de Escenarios</h3><table class="data-table"><thead><tr><th>Escenario</th>';
+  let html='<h3 style="color:var(--gold);margin-bottom:.5rem">📋 Comparación de Escenarios</h3><table class="evidence-table"><thead><tr><th>Escenario</th>';
   (industriaActual.nodos||[]).filter(n=>n.tipo==='driver').slice(0,4).forEach(d=>html+=`<th>${d.label}</th>`);
   if(kpiRes)html+=`<th>${kpiRes.label}</th>`;html+='</tr></thead><tbody>';
   (industriaActual.escenarios||[]).forEach(esc=>{
-    html+=`<tr><td style="font-weight:700;color:var(--gold)">${esc.nombre}</td>`;
-    (industriaActual.nodos||[]).filter(n=>n.tipo==='driver').slice(0,4).forEach(d=>html+=`<td>${esc.palancas[d.id]||'-'}</td>`);
-    if(kpiRes){const sup={...(industriaActual.supuestos||{}),...perfilCliente};try{const f=obtenerFormula(industriaActual);const r=f(esc.palancas,sup,CTX);html+=`<td style="font-weight:700;color:${(r[kpiRes.id]||0)>(estadoActual[kpiRes.id]||0)?'var(--teal)':'var(--red)'}">${fmt(r[kpiRes.id]||0,kpiRes.formato)}</td>`;}catch(e){html+='<td>—</td>';}}
+    html+=`<tr><td><strong>${esc.nombre}</strong></td>`;
+    (industriaActual.nodos||[]).filter(n=>n.tipo==='driver').slice(0,4).forEach(d=>html+=`<td>${esc.palancas[d.id]||'—'}</td>`);
+    if(kpiRes){try{const f=obtenerFormula(industriaActual);const r=f(esc.palancas,industriaActual.supuestos,CTX);html+=`<td style="font-weight:700;color:${(r[kpiRes.id]||0)>(estadoActual[kpiRes.id]||0)?'var(--teal)':'var(--red)'}">${fmt(r[kpiRes.id]||0,kpiRes.formato)}</td>`;}catch(e){html+='<td>—</td>';}}
     html+='</tr>';
   });
-  html+='</tbody></table>';c.innerHTML=html;
+  html+='</tbody></table>';
+  c.innerHTML=html;
 }
 function runMC(){
-  if(!industriaActual)return;const drivers=(industriaActual.nodos||[]).filter(n=>n.tipo==='driver');const res=[];for(let i=0;i<500;i++){const pal={};drivers.forEach(n=>{const base=estadoActual[n.id]||industriaActual.initState[n.id]||0;pal[n.id]=base*(0.8+Math.random()*0.4);});const r=simular(pal);const kr=(industriaActual.kpis||[]).find(k=>k.id.includes('ebitda')||k.id.includes('margen'));if(kr)res.push(r[kr.id]||0);}
-  if(!res.length)return;const sorted=[...res].sort((a,b)=>a-b);const p10=sorted[50],p50=sorted[250],p90=sorted[450];const bins={};res.forEach(v=>{const k=Math.round(v);bins[k]=(bins[k]||0)+1;});const labels=Object.keys(bins).sort((a,b)=>a-b),data=labels.map(l=>bins[l]);
-  if(chartInst)chartInst.destroy();const canvas=document.getElementById('impactChart');
-  chartInst=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels,datasets:[{data,backgroundColor:'#c9a84c',borderRadius:3}]},options:{responsive:true,plugins:{title:{display:true,text:`P10: ${fmt(p10,'usdM')} | P50: ${fmt(p50,'usdM')} | P90: ${fmt(p90,'usdM')}`,color:'#e2e9f3'},legend:{display:false}},scales:{y:{ticks:{color:'#6b809b'}},x:{ticks:{color:'#6b809b'}}}}});
+  if(!industriaActual)return;const drivers=(industriaActual.nodos||[]).filter(n=>n.tipo==='driver');const res=[];for(let i=0;i<500;i++){const pal={};drivers.forEach(n=>{pal[n.id]=(estadoActual[n.id]||industriaActual.initState[n.id]||0)*(0.85+Math.random()*0.3);});const r=simular(pal);const kr=(industriaActual.kpis||[]).find(k=>k.id.includes('ebitda')||k.id.includes('margen'));if(kr)res.push(r[kr.id]||0);}
+  if(res.length<10)return;const sorted=[...res].sort((a,b)=>a-b);const p10=sorted[50],p50=sorted[250],p90=sorted[450];alert(`Montecarlo (500 simulaciones)\nP10: ${fmt(p10,'usdM')}\nP50: ${fmt(p50,'usdM')}\nP90: ${fmt(p90,'usdM')}`);
 }
-function renderAll(){renderKPIs();renderBoardroom();renderGrafo();renderEscenarios();}
 function switchTab(tab){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-  const map={kpis:'tab-kpis',boardroom:'tab-boardroom',grafo:'tab-grafo',escenarios:'tab-escenarios'};
+  const map={kpis:'tab-kpis',plan:'tab-plan',cadenas:'tab-cadenas',grafo:'tab-grafo',evidencia:'tab-evidencia',escenarios:'tab-escenarios'};
   document.getElementById(map[tab]).classList.add('active');
-  document.querySelectorAll('.tab').forEach((t,i)=>{if(Object.keys(map)[i]===tab)t.classList.add('active');});
-  if(tab==='grafo')renderGrafo();if(tab==='escenarios')renderEscenarios();if(tab==='boardroom')renderBoardroom();
+  [...document.querySelectorAll('.tab')].find(t=>t.textContent.includes(Object.keys(map).find(k=>map[k]===map[tab])))?.classList.add('active');
 }
+
 document.getElementById('indSel').addEventListener('change',poblarEmpresas);
 document.getElementById('empSel').addEventListener('change',function(){cargarEmpresa(this.value);});
-window.addEventListener('load',()=>{poblarEmpresas();});
+window.addEventListener('load',poblarEmpresas);
 </script>
 </body>
 </html>
