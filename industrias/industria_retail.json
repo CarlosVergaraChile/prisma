@@ -1,0 +1,84 @@
+{
+  "nombre": "Retail y Consumo Masivo (Profundizado)",
+  "supuestos": {
+    "tiendas": 45,
+    "costoFijoPorTienda": 78_000_000,
+    "diasAno": 365,
+    "factorConversion": 0.22
+  },
+  "elasticidades": {
+    "trafico": 0.9,
+    "ticketPromedio": 1.2,
+    "tasaConversion": 0.7,
+    "margenBrutoPct": 0.8,
+    "costoLogisticaPct": -0.5,
+    "mermaPct": -0.4,
+    "penetracionOnline": 0.7,
+    "costoArriendo": -0.45,
+    "gastoMarketing": 0.5,
+    "satisfaccionCliente": 0.35,
+    "densidadTiendasRegion": 0.3
+  },
+  "incertidumbre": {
+    "trafico": { "min": 50, "max": 120 },
+    "ticketPromedio": { "min": 8000, "max": 18000 },
+    "tasaConversion": { "min": 12, "max": 35 },
+    "margenBrutoPct": { "min": 32, "max": 52 },
+    "costoLogisticaPct": { "min": 5, "max": 14 },
+    "mermaPct": { "min": 1.5, "max": 5 },
+    "penetracionOnline": { "min": 8, "max": 45 },
+    "costoArriendo": { "min": 3.0, "max": 7.5 },
+    "gastoMarketing": { "min": 60, "max": 250 },
+    "satisfaccionCliente": { "min": 45, "max": 85 },
+    "densidadTiendasRegion": { "min": 55, "max": 95 }
+  },
+  "nodos": [
+    {"id":"trafico","label":"Tráfico Tiendas (miles/día)","tipo":"driver","unidades":"miles/día","elasticidad":0.9},
+    {"id":"ticketPromedio","label":"Ticket Promedio (CLP)","tipo":"driver","unidades":"CLP","elasticidad":1.2},
+    {"id":"tasaConversion","label":"Tasa de Conversión (%)","tipo":"driver","unidades":"%","elasticidad":0.7},
+    {"id":"margenBrutoPct","label":"Margen Bruto (%)","tipo":"driver","unidades":"%","elasticidad":0.8},
+    {"id":"costoLogisticaPct","label":"Costo Logística (%)","tipo":"driver","unidades":"%","elasticidad":-0.5},
+    {"id":"mermaPct","label":"Merma (%)","tipo":"driver","unidades":"%","elasticidad":-0.4},
+    {"id":"penetracionOnline","label":"Penetración Online (%)","tipo":"driver","unidades":"%","elasticidad":0.7},
+    {"id":"costoArriendo","label":"Costo Arriendo por Tienda (M CLP/mes)","tipo":"driver","unidades":"M CLP/mes","elasticidad":-0.45},
+    {"id":"gastoMarketing","label":"Gasto Marketing Digital (M CLP/año)","tipo":"driver","unidades":"M CLP/año","elasticidad":0.5},
+    {"id":"satisfaccionCliente","label":"NPS (0-100)","tipo":"driver","unidades":"puntos","elasticidad":0.35},
+    {"id":"densidadTiendasRegion","label":"Densidad Regional (%)","tipo":"driver","unidades":"%","elasticidad":0.3},
+    {"id":"ebitda","label":"EBITDA (M CLP)","tipo":"resultado","unidades":"M CLP","elasticidad":0},
+    {"id":"ventasOnlinePct","label":"Ventas Online (%)","tipo":"intermedio","unidades":"%","elasticidad":0},
+    {"id":"rotacionInventario","label":"Cobertura Inventario (sem)","tipo":"intermedio","unidades":"sem","elasticidad":0}
+  ],
+  "arcos": [
+    {"origen":"trafico","destino":"ebitda","polaridad":"positivo"},
+    {"origen":"ticketPromedio","destino":"ebitda","polaridad":"positivo"},
+    {"origen":"tasaConversion","destino":"ebitda","polaridad":"positivo"},
+    {"origen":"margenBrutoPct","destino":"ebitda","polaridad":"positivo"},
+    {"origen":"costoLogisticaPct","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"mermaPct","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"penetracionOnline","destino":"ventasOnlinePct","polaridad":"positivo"},
+    {"origen":"gastoMarketing","destino":"penetracionOnline","polaridad":"positivo"},
+    {"origen":"costoArriendo","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"satisfaccionCliente","destino":"tasaConversion","polaridad":"positivo"},
+    {"origen":"densidadTiendasRegion","destino":"trafico","polaridad":"positivo"}
+  ],
+  "kpis": [
+    {"id":"trafico","label":"Tráfico","base":85,"unidades":"miles/día","formato":"num"},
+    {"id":"ticketPromedio","label":"Ticket Prom.","base":12500,"unidades":"CLP","formato":"num"},
+    {"id":"mermaPct","label":"Merma","base":2.8,"unidades":"%","formato":"num"},
+    {"id":"ebitda","label":"EBITDA","base":0,"unidades":"M CLP","formato":"dinero"},
+    {"id":"ventasOnlinePct","label":"Ventas Online","base":18,"unidades":"%","formato":"num"},
+    {"id":"rotacionInventario","label":"Cobertura Inv.","base":6.2,"unidades":"sem","formato":"num"}
+  ],
+  "cadenas": [
+    {"nombre":"Caída de tráfico","descripcion":"Menos visitas → menos conversión → EBITDA ↓","impacto":"Riesgo alto","polaridad":"negativo"},
+    {"nombre":"Mejora NPS","descripcion":"Más satisfacción → más conversión → EBITDA ↑","impacto":"Positivo","polaridad":"positivo"},
+    {"nombre":"Aumento de arriendos","descripcion":"Mayor costo fijo → margen ↓","impacto":"Negativo","polaridad":"negativo"}
+  ],
+  "escenarios": [
+    {"nombre":"Base","palancas":{"trafico":85,"ticketPromedio":12500,"tasaConversion":22,"margenBrutoPct":42,"costoLogisticaPct":8,"mermaPct":2.8,"penetracionOnline":18,"costoArriendo":4.5,"gastoMarketing":120,"satisfaccionCliente":68,"densidadTiendasRegion":75}},
+    {"nombre":"Crisis Consumo","palancas":{"trafico":65,"ticketPromedio":10500,"tasaConversion":18,"margenBrutoPct":38,"costoLogisticaPct":10,"mermaPct":3.5,"penetracionOnline":22,"costoArriendo":5.2,"gastoMarketing":140,"satisfaccionCliente":58,"densidadTiendasRegion":70}},
+    {"nombre":"Expansión Digital","palancas":{"trafico":80,"ticketPromedio":13000,"tasaConversion":25,"margenBrutoPct":44,"costoLogisticaPct":7,"mermaPct":2.5,"penetracionOnline":35,"costoArriendo":4.2,"gastoMarketing":180,"satisfaccionCliente":72,"densidadTiendasRegion":78}}
+  ],
+  "initState": {"trafico":85,"ticketPromedio":12500,"tasaConversion":22,"margenBrutoPct":42,"costoLogisticaPct":8,"mermaPct":2.8,"penetracionOnline":18,"costoArriendo":4.5,"gastoMarketing":120,"satisfaccionCliente":68,"densidadTiendasRegion":75},
+  "formulaPrincipal": "function(p,s,ctx){var trans=p.trafico*1000*(p.tasaConversion/100)*s.diasAno;var ing=trans*p.ticketPromedio;var mg=ing*(p.margenBrutoPct/100);var cLog=ing*(p.costoLogisticaPct/100);var cMer=ing*(p.mermaPct/100);var ingOn=ing*(p.penetracionOnline/100);var cOn=ingOn*0.12;var cArr=s.tiendas*p.costoArriendo*12*1_000_000;var cMkt=p.gastoMarketing*1_000_000;var cFijo=s.tiendas*s.costoFijoPorTienda;var ebitda=(mg-cLog-cMer-cOn-cArr-cMkt-cFijo)/1_000_000;var vOnPct=p.penetracionOnline;var cInv=Math.max(1,Math.round(7.5-p.tasaConversion*0.15));return{ebitda:+ebitda.toFixed(2),ventasOnlinePct:+vOnPct.toFixed(0),rotacionInventario:cInv};}"
+}
