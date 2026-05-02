@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>PRISMA · by GL Strategic</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --bg:#0a0e14; --surface:#0f1419; --panel:#131c2a; --card:#1a2332;
+  --border:#2a3d52; --text:#e0e8f0; --muted:#8fa3b8;
+  --teal:#06d6a0; --gold:#f1c40f; --blue:#3498db; --red:#ee5a6f; --warn:#f39c12;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh}
+/* ── TOPBAR ── */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.4rem 1.2rem;min-height:52px;display:flex;align-items:center;gap:.8rem;flex-shrink:0;flex-wrap:wrap}
+.brand{font-weight:800;font-size:.95rem;color:var(--teal);white-space:nowrap}
+.brand span{color:var(--gold)}
+.topbar select,input[type=file],button{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:.35rem .7rem;border-radius:6px;font-size:.78rem;cursor:pointer}
+.topbar button{background:var(--teal);color:#000;font-weight:700;border:none}
+.topbar button.secondary{background:transparent;color:var(--teal);border:1px solid var(--teal)}
+.separator{width:1px;height:20px;background:var(--border);margin:0 .2rem}
+.company-badge{background:rgba(6,214,160,.12);border:1px solid rgba(6,214,160,.25);border-radius:8px;padding:.25rem .7rem;font-size:.72rem;color:var(--teal);font-weight:600}
+/* ── MAIN ── */
+.main{flex:1;display:flex;overflow:hidden}
+.sidebar{width:310px;background:var(--panel);border-right:1px solid var(--border);padding:.8rem;overflow-y:auto;flex-shrink:0}
+.content{flex:1;padding:.8rem;overflow-y:auto}
+/* ── SLIDERS ── */
+.palanca{margin-bottom:.7rem}
+.palanca label{display:flex;justify-content:space-between;font-size:.73rem;font-weight:600;color:var(--muted)}
+.palanca input{width:100%;margin-top:.15rem}
+.palanca .range-labels{display:flex;justify-content:space-between;font-size:.58rem;color:var(--muted)}
+/* ── KPIs ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.6rem;margin-bottom:.8rem}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.7rem}
+.kpi-card .label{font-size:.62rem;color:var(--muted);text-transform:uppercase}
+.kpi-card .value{font-size:1.3rem;font-weight:800;margin:.15rem 0;line-height:1}
+.kpi-card .value.gold{color:var(--gold)} .kpi-card .value.teal{color:var(--teal)}
+.kpi-card .value.red{color:var(--red)} .kpi-card .value.blue{color:var(--blue)}
+.kpi-card .sub{font-size:.58rem;color:var(--muted)}
+/* ── TABS ── */
+.tabs{display:flex;gap:.35rem;margin-bottom:.8rem}
+.tab{padding:.35rem .8rem;border-radius:6px;cursor:pointer;font-size:.73rem;background:var(--panel);border:1px solid var(--border);color:var(--muted);transition:all .2s}
+.tab.active{background:var(--teal);color:#000;font-weight:700}
+.tab-content{display:none}
+.tab-content.active{display:block}
+/* ── CHARTS ── */
+canvas{max-height:260px;margin-top:.4rem}
+/* ── BOARDROOM ── */
+.cascade-row{display:flex;align-items:center;gap:.4rem;margin:.25rem 0;font-size:.7rem}
+.cascade-bar{height:18px;border-radius:4px;display:inline-block;min-width:18px}
+.cascade-bar.pos{background:var(--teal)} .cascade-bar.neg{background:var(--red)}
+/* ── CADENAS ── */
+.chain-card{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:6px;padding:.6rem;margin-bottom:.4rem;font-size:.72rem}
+.chain-card.neg{border-left-color:var(--red)}
+.chain-card .chain-title{font-weight:700;margin-bottom:.2rem}
+.chain-card .chain-desc{color:var(--muted);line-height:1.4;font-size:.68rem}
+.chain-card .chain-impact{font-size:.65rem;margin-top:.25rem;font-weight:600}
+/* ── ALERTS ── */
+.alert-banner{padding:.4rem .7rem;border-radius:6px;margin:.35rem 0;font-size:.7rem;background:rgba(238,90,111,.1);border:1px solid rgba(238,90,111,.3);color:var(--red)}
+.alert-banner.ok{background:rgba(6,214,160,.1);border-color:rgba(6,214,160,.3);color:var(--teal)}
+.btn-row{display:flex;gap:.4rem;flex-wrap:wrap;margin:.4rem 0}
+/* ── GRAFO ── */
+.grafo-svg-container{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.5rem;margin-top:.5rem;overflow:auto}
+.grafo-svg-container svg{width:100%;min-height:350px}
+.node-rect{fill:#1a2332;stroke-width:2;rx:4}
+.node-text{font-size:9px;fill:#e0e8f0;font-weight:600;text-anchor:middle}
+.node-label{font-size:7px;fill:#8fa3b8;text-anchor:middle}
+.edge-line{stroke-width:2;fill:none;opacity:0.8}
+.edge-pos{stroke:#06d6a0} .edge-neg{stroke:#ee5a6f}
+/* ── SEMÁFORO ── */
+.semaforo{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.semaforo.verde{background:#06d6a0;box-shadow:0 0 6px #06d6a0}
+.semaforo.amarillo{background:#f39c12;box-shadow:0 0 6px #f39c12}
+.semaforo.rojo{background:#ee5a6f;box-shadow:0 0 6px #ee5a6f}
+/* ── SUPUESTOS ── */
+.supuestos-table{width:100%;border-collapse:collapse;font-size:.7rem;margin-top:.5rem}
+.supuestos-table td,.supuestos-table th{padding:.3rem .5rem;border:1px solid var(--border)}
+.supuestos-table td input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.15rem .3rem;border-radius:4px;font-size:.7rem}
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:200;justify-content:center;align-items:center}
+.modal-overlay.active{display:flex}
+.modal-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1.2rem;width:90%;max-width:400px}
+.modal-box h3{color:var(--gold);margin-bottom:.6rem;font-size:.85rem}
+.modal-box input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.4rem;border-radius:6px;margin-bottom:.6rem}
+.modal-box .btn-row{justify-content:flex-end}
+.saved-scenario{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:.4rem .6rem;margin-bottom:.3rem;display:flex;justify-content:space-between;align-items:center;font-size:.73rem;cursor:pointer}
+.saved-scenario:hover{border-color:var(--teal)}
+/* ── PROYECCIÓN ── */
+.proyeccion-controls{display:flex;align-items:center;gap:.5rem;margin-bottom:.8rem}
+.proyeccion-controls label{font-size:.73rem;color:var(--muted)}
+.proyeccion-controls input{width:120px}
+.calibracion-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.8rem;margin-bottom:.8rem}
+.calibracion-box .result{font-family:monospace;font-size:.73rem;color:var(--teal);margin-top:.5rem;white-space:pre-wrap}
+/* ── RESPONSIVE ── */
+@media(max-width:900px){.sidebar{width:100%;max-height:35vh}.main{flex-direction:column}}
+@media print{body{background:#fff;color:#000}.sidebar,.topbar{display:none}.content{overflow:visible}}
+body.presentation .topbar{display:none}
+body.presentation .sidebar{display:none}
+body.presentation .tabs{display:none}
+body.presentation .kpi-card{padding:1.5rem}
+body.presentation .kpi-card .value{font-size:2.2rem}
+body.presentation .kpi-card .label{font-size:.85rem}
+body.presentation .kpi-grid{grid-template-columns:repeat(4,1fr);gap:1.2rem}
+body.presentation .content{padding:2rem;background:var(--bg)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">◆ <span>PRISMA</span> <small style="color:var(--muted);font-size:.6rem;">by GL Strategic</small></div>
+  
+  <span style="color:var(--muted);font-size:.7rem">Industria:</span>
+  <select id="industrySelect">
+    <option value="mineria">Minería</option>
+    <option value="clinica">Clínica Privada</option>
+    <option value="hospital">Hospital Público</option>
+    <option value="acuicola">Acuícola</option>
+    <option value="retail">Retail</option>
+    <option value="logistica">Logística</option>
+    <option value="telecom">Telecom</option>
+    <option value="agro">Agroindustria</option>
+    <option value="energia">Energía</option>
+  </select>
+  
+  <span style="color:var(--muted);font-size:.7rem">Empresa:</span>
+  <select id="companySelect" style="min-width:160px"></select>
+  <span style="color:var(--muted);font-size:.7rem">vs</span>
+  <select id="companySelectB" style="min-width:140px" onchange="cargarEmpresaB(this.value)">
+    <option value="">— Sin comparar —</option>
+  </select>
+  <span id="empresaBadge" class="company-badge" style="display:none"></span>
+  
+  <div class="separator"></div>
+  
+  <label style="font-size:.68rem;color:var(--muted)">+Industria JSON:</label>
+  <input type="file" id="uploadIndustry" accept=".json" title="Cargar industria externa">
+  <label style="font-size:.68rem;color:var(--muted)">+Perfil:</label>
+  <input type="file" id="uploadProfile" accept=".json" title="Cargar perfil cliente">
+  <button id="btnContexto" class="secondary" title="Cargar contexto macro">📊 Ctx</button>
+  <input type="file" id="uploadContexto" accept=".json" style="display:none">
+  
+  <div class="separator"></div>
+  
+  <button onclick="runMontecarlo()">🎲 Montecarlo</button>
+  <button onclick="window.print()" class="secondary">🖨️ PDF</button>
+  <button onclick="exportarPDFNarrativo()" class="secondary">📄 PDF +</button>
+  <button id="anchorBtn" class="secondary" onclick="anchorBaseline()">📌 Anclar</button>
+  <button onclick="abrirModalGuardar()" class="secondary">💾 Guardar</button>
+  <button onclick="compartirURL()" class="secondary">🔗 Enlace</button>
+  <button id="btnContextoAuto" onclick="actualizarContextoAuto()" class="secondary">🌐 Actualizar</button>
+  <button id="presentationBtn" onclick="togglePresentation()">🎥 Presentar</button>
+</div>
+
+<div class="main">
+  <div class="sidebar" id="sidebar">
+    <div id="scenarioSelector" style="margin-bottom:.6rem">
+      <label style="font-size:.65rem;color:var(--muted);font-weight:700">Escenario rápido:</label>
+      <select id="scenarioSelect" onchange="loadScenario(this.value)" style="width:100%;margin-top:.15rem">
+        <option value="">— Personalizado —</option>
+      </select>
+    </div>
+    <div id="palancasContainer"></div>
+    <div style="margin-top:.6rem">
+      <button onclick="resetSliders()" class="secondary" style="width:100%">↺ Resetear</button>
+    </div>
+  </div>
+  
+  <div class="content" id="content">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('kpis')">📊 KPIs</button>
+      <button class="tab" onclick="switchTab('boardroom')">💼 Boardroom</button>
+      <button class="tab" onclick="switchTab('cadenas')">⛓️ Cadenas</button>
+      <button class="tab" onclick="switchTab('grafo')">🔗 Grafo</button>
+      <button class="tab" onclick="switchTab('supuestos')">📋 Supuestos</button>
+      <button class="tab" onclick="switchTab('proyeccion')">📈 Proyección</button>
+      <button class="tab" onclick="switchTab('calibracion')">🔧 Calibrar</button>
+    </div>
+    <div id="tab-kpis" class="tab-content active">
+      <div class="kpi-grid" id="kpiContainer"></div>
+      <canvas id="impactChart"></canvas>
+    </div>
+    <div id="tab-boardroom" class="tab-content">
+      <div id="boardroomContent"></div>
+    </div>
+    <div id="tab-cadenas" class="tab-content">
+      <div id="cadenasContent"></div>
+    </div>
+    <div id="tab-grafo" class="tab-content">
+      <div class="grafo-svg-container" id="grafoContainer"></div>
+    </div>
+    <div id="tab-supuestos" class="tab-content">
+      <div style="margin-bottom:.5rem">
+        <button onclick="aplicarSupuestos()" class="secondary">✅ Aplicar cambios</button>
+        <button onclick="resetSupuestos()" class="secondary">↺ Resetear</button>
+      </div>
+      <table class="supuestos-table" id="supuestosTable"></table>
+    </div>
+    <div id="tab-proyeccion" class="tab-content">
+      <div class="proyeccion-controls">
+        <label>Meses a proyectar:</label>
+        <input type="range" id="mesesProy" min="6" max="24" value="12" step="6" oninput="document.getElementById('mesesProyVal').textContent=this.value;actualizarProyeccion()">
+        <span id="mesesProyVal" style="color:var(--teal);font-weight:700">12</span>
+      </div>
+      <canvas id="proyeccionChart" style="max-height:300px"></canvas>
+    </div>
+    <div id="tab-calibracion" class="tab-content">
+      <div class="calibracion-box">
+        <p style="font-size:.73rem;color:var(--muted);margin-bottom:.5rem">Cargue CSV con columnas: <strong>mes, [palanca1], [palanca2], ..., [kpi_resultado]</strong></p>
+        <input type="file" id="csvCalibrar" accept=".csv">
+        <button onclick="calibrarDesdeCSV()" class="secondary" style="margin-left:.5rem">🔍 Analizar</button>
+        <div class="result" id="calResult"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GUARDAR -->
+<div class="modal-overlay" id="modalGuardar">
+  <div class="modal-box">
+    <h3>💾 Escenarios guardados</h3>
+    <div style="display:flex;gap:.4rem;margin-bottom:.6rem">
+      <input type="text" id="nombreEscenario" placeholder="Nombre del escenario" style="flex:1">
+      <button onclick="guardarEscenario()">Guardar</button>
+    </div>
+    <div id="listaEscenarios" style="max-height:200px;overflow-y:auto;margin-bottom:.6rem"></div>
+    <div class="btn-row">
+      <button onclick="cerrarModalGuardar()" class="secondary">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// 1. CONTEXTO MACRO
+// ═══════════════════════════════════════════
+const DEFAULT_CTX = {
+  uf_clp:37500,dolar_clp:920,ipc_anual:4.2,tasa_interes:6.75,inflacion_salud:5.8,
+  precio_cobre_largo:4.0,precio_gas_referencia:6.5,precio_carbon_referencia:110,
+  precio_spot_electrico:80,impuesto_verde_usd_ton:5,fecha_actualizacion:"2025-05-01"
+};
+let CTX = {...DEFAULT_CTX};
+
+// ═══════════════════════════════════════════
+// 2. CATÁLOGO DE EMPRESAS
+// ═══════════════════════════════════════════
+const COMPANIES = {
+  mineria:[
+    {id:"codelco_andina",nombre:"Codelco – División Andina",perfil:{produccionBase:60000,leyCabezaBase:0.72,recuperacion:0.86,depreciacion:75}},
+    {id:"codelco_teniente",nombre:"Codelco – El Teniente",perfil:{produccionBase:85000,leyCabezaBase:0.78,recuperacion:0.88,depreciacion:95}},
+    {id:"escondida",nombre:"BHP – Escondida",perfil:{produccionBase:120000,leyCabezaBase:0.85,recuperacion:0.90,proporcionMolibdeno:0.0003,depreciacion:140}},
+    {id:"los_bronces",nombre:"Anglo American – Los Bronces",perfil:{produccionBase:48000,leyCabezaBase:0.62,recuperacion:0.83,depreciacion:58}},
+    {id:"los_pelambres",nombre:"Antofagasta Minerals – Los Pelambres",perfil:{produccionBase:55000,leyCabezaBase:0.68,recuperacion:0.85,depreciacion:62}},
+    {id:"quebrada_blanca",nombre:"Teck – Quebrada Blanca",perfil:{produccionBase:35000,leyCabezaBase:0.55,recuperacion:0.80,depreciacion:50}},
+    {id:"el_abra",nombre:"Freeport – El Abra",perfil:{produccionBase:25000,leyCabezaBase:0.48,recuperacion:0.78,depreciacion:38}},
+    {id:"minera_pequena",nombre:"Pequeña Minería",perfil:{produccionBase:8000,leyCabezaBase:0.45,recuperacion:0.75,depreciacion:12}}
+  ],
+  clinica:[
+    {id:"alemana",nombre:"Clínica Alemana",perfil:{camas:120,tarifa:450,costoInsumos:210,ocupacion:84,estancia:3.5,readmision:2.8}},
+    {id:"las_condes",nombre:"Clínica Las Condes",perfil:{camas:140,tarifa:420,costoInsumos:200,ocupacion:82,estancia:3.7,readmision:3.0}},
+    {id:"uc",nombre:"Red UC Christus",perfil:{camas:110,tarifa:380,costoInsumos:190,ocupacion:80,estancia:4.0,readmision:3.2}},
+    {id:"santa_maria",nombre:"Clínica Santa María",perfil:{camas:95,tarifa:400,costoInsumos:195,ocupacion:78,estancia:3.8,readmision:3.1}},
+    {id:"davila",nombre:"Clínica Dávila",perfil:{camas:85,tarifa:310,costoInsumos:185,ocupacion:82,estancia:3.8,readmision:3.2}},
+    {id:"indisa",nombre:"Clínica Indisa",perfil:{camas:75,tarifa:350,costoInsumos:180,ocupacion:76,estancia:4.2,readmision:3.5}},
+    {id:"clinica_region",nombre:"Clínica Regional",perfil:{camas:60,tarifa:280,costoInsumos:160,ocupacion:72,estancia:4.5,readmision:3.8}}
+  ],
+  hospital:[
+    {id:"barros_luco",nombre:"Hospital Barros Luco",perfil:{camas:280,presupuestoBase:48e9,costoInsumos:240,ocupacion:86,estancia:5.0}},
+    {id:"san_juan",nombre:"Hospital San Juan de Dios",perfil:{camas:260,presupuestoBase:44e9,costoInsumos:230,ocupacion:84,estancia:5.2}},
+    {id:"sotero",nombre:"Hospital Sótero del Río",perfil:{camas:300,presupuestoBase:52e9,costoInsumos:250,ocupacion:88,estancia:4.8}},
+    {id:"concepcion",nombre:"Hospital Regional de Concepción",perfil:{camas:250,presupuestoBase:42e9,costoInsumos:220,ocupacion:84,estancia:5.2}},
+    {id:"valparaiso",nombre:"Hospital Regional de Valparaíso",perfil:{camas:220,presupuestoBase:38e9,costoInsumos:210,ocupacion:82,estancia:5.5}},
+    {id:"temuco",nombre:"Hospital Dr. Hernán Henríquez",perfil:{camas:240,presupuestoBase:40e9,costoInsumos:225,ocupacion:83,estancia:5.3}}
+  ],
+  acuicola:[
+    {id:"aquachile",nombre:"AquaChile (Agrosuper)",perfil:{biomasaInicial:22000,costoAlimento:1150,mort:7,calig:2.5,yield:83}},
+    {id:"cermaq",nombre:"Cermaq Chile",perfil:{biomasaInicial:18000,costoAlimento:1180,mort:7.5,calig:2.8,yield:82}},
+    {id:"mowi",nombre:"Mowi (Marine Harvest)",perfil:{biomasaInicial:20000,costoAlimento:1120,mort:6.5,calig:2.2,yield:84}},
+    {id:"camanchaca",nombre:"Salmones Camanchaca",perfil:{biomasaInicial:14000,costoAlimento:1200,mort:8,calig:3.0,yield:81}},
+    {id:"blumar",nombre:"Blumar",perfil:{biomasaInicial:12500,costoAlimento:1200,mort:8,calig:3,yield:82}},
+    {id:"multix",nombre:"Multi X",perfil:{biomasaInicial:16000,costoAlimento:1170,mort:7.8,calig:2.9,yield:81.5}},
+    {id:"acuicola_pequena",nombre:"Productor mediano",perfil:{biomasaInicial:6000,costoAlimento:1250,mort:9,calig:3.5,yield:79}}
+  ],
+  retail:[
+    {id:"falabella",nombre:"Falabella",perfil:{tiendas:52,ticketPromedio:14500,tasaConversion:24,margenBrutoPct:44,costoLogisticaPct:7.5,mermaPct:2.5,penetracionOnline:32,costoArriendo:5.8}},
+    {id:"cencosud",nombre:"Cencosud",perfil:{tiendas:48,ticketPromedio:13800,tasaConversion:23,margenBrutoPct:42,costoLogisticaPct:8,mermaPct:2.7,penetracionOnline:28,costoArriendo:5.2}},
+    {id:"ripley",nombre:"Ripley",perfil:{tiendas:35,ticketPromedio:15000,tasaConversion:20,margenBrutoPct:45,costoLogisticaPct:7,mermaPct:2.3,penetracionOnline:25,costoArriendo:4.8}},
+    {id:"smu",nombre:"SMU (Unimarc)",perfil:{tiendas:60,ticketPromedio:9500,tasaConversion:28,margenBrutoPct:38,costoLogisticaPct:9,mermaPct:3.2,penetracionOnline:15,costoArriendo:4.2}},
+    {id:"walmart",nombre:"Walmart Chile",perfil:{tiendas:55,ticketPromedio:11000,tasaConversion:26,margenBrutoPct:36,costoLogisticaPct:8.5,mermaPct:3.0,penetracionOnline:18,costoArriendo:4.5}},
+    {id:"la_polar",nombre:"La Polar",perfil:{tiendas:28,ticketPromedio:12500,tasaConversion:18,margenBrutoPct:40,costoLogisticaPct:8.2,mermaPct:2.9,penetracionOnline:20,costoArriendo:3.8}}
+  ],
+  logistica:[
+    {id:"saam",nombre:"SAAM",perfil:{flotaPropia:100,flotaSubcontratada:60,tarifaFlete:3.2,ocupacionFlota:88,congestionRuta:12}},
+    {id:"agunsa",nombre:"Agunsa",perfil:{flotaPropia:85,flotaSubcontratada:50,tarifaFlete:3.0,ocupacionFlota:85,congestionRuta:14}},
+    {id:"ultramar",nombre:"Ultramar",perfil:{flotaPropia:75,flotaSubcontratada:45,tarifaFlete:2.9,ocupacionFlota:83,congestionRuta:15}},
+    {id:"sitrans",nombre:"Sitrans",perfil:{flotaPropia:90,flotaSubcontratada:55,tarifaFlete:3.1,ocupacionFlota:86,congestionRuta:13}},
+    {id:"dhl",nombre:"DHL Chile",perfil:{flotaPropia:65,flotaSubcontratada:40,tarifaFlete:3.5,ocupacionFlota:90,congestionRuta:10}},
+    {id:"blue_express",nombre:"Blue Express",perfil:{flotaPropia:55,flotaSubcontratada:35,tarifaFlete:2.7,ocupacionFlota:82,congestionRuta:18}}
+  ],
+  telecom:[
+    {id:"entel",nombre:"Entel",perfil:{suscriptoresMoviles:2500000,suscriptoresFijos:600000,arpuMovil:10500,arpuFijo:15500,churnVoluntario:1.8,calidadServicio:95}},
+    {id:"movistar",nombre:"Movistar Chile",perfil:{suscriptoresMoviles:2800000,suscriptoresFijos:700000,arpuMovil:9500,arpuFijo:14500,churnVoluntario:2.2,calidadServicio:93}},
+    {id:"claro",nombre:"Claro Chile",perfil:{suscriptoresMoviles:2100000,suscriptoresFijos:450000,arpuMovil:8800,arpuFijo:13000,churnVoluntario:2.5,calidadServicio:92}},
+    {id:"vtr",nombre:"VTR",perfil:{suscriptoresMoviles:800000,suscriptoresFijos:350000,arpuMovil:9200,arpuFijo:14000,churnVoluntario:2.8,calidadServicio:90}},
+    {id:"wom",nombre:"WOM",perfil:{suscriptoresMoviles:1600000,suscriptoresFijos:200000,arpuMovil:7800,arpuFijo:12000,churnVoluntario:3.2,calidadServicio:89}},
+    {id:"mundo_pacifico",nombre:"Mundo Pacífico",perfil:{suscriptoresMoviles:400000,suscriptoresFijos:150000,arpuMovil:8500,arpuFijo:13500,churnVoluntario:2.0,calidadServicio:94}}
+  ],
+  agro:[
+    {id:"hortifrut",nombre:"Hortifrut",perfil:{hectareas:1200,rendimientoBase:30,rendimiento:94,precioExportacion:5.2,certificacionGlobalGAP:92}},
+    {id:"san_clemente",nombre:"San Clemente",perfil:{hectareas:950,rendimientoBase:28,rendimiento:91,precioExportacion:4.8,certificacionGlobalGAP:88}},
+    {id:"dole",nombre:"Dole Chile",perfil:{hectareas:1100,rendimientoBase:29,rendimiento:93,precioExportacion:5.0,certificacionGlobalGAP:95}},
+    {id:"del_monte",nombre:"Del Monte Chile",perfil:{hectareas:800,rendimientoBase:27,rendimiento:90,precioExportacion:4.6,certificacionGlobalGAP:90}},
+    {id:"subsole",nombre:"Exportadora Subsole",perfil:{hectareas:700,rendimientoBase:26,rendimiento:88,precioExportacion:4.5,certificacionGlobalGAP:85}},
+    {id:"hijuelas",nombre:"Grupo Hijuelas",perfil:{hectareas:650,rendimientoBase:25,rendimiento:89,precioExportacion:4.4,certificacionGlobalGAP:84}}
+  ],
+  energia:[
+    {id:"enel",nombre:"Enel Generación Chile",perfil:{capacidadTotalMW:800,disponibilidadTermico:90,factorHidrologia:78,factorPlantaERNC:35,coberturaPPA:75}},
+    {id:"aes_andes",nombre:"AES Andes",perfil:{capacidadTotalMW:650,disponibilidadTermico:88,factorHidrologia:72,factorPlantaERNC:30,coberturaPPA:70}},
+    {id:"colbun",nombre:"Colbún",perfil:{capacidadTotalMW:700,disponibilidadTermico:87,factorHidrologia:76,factorPlantaERNC:33,coberturaPPA:72}},
+    {id:"engie",nombre:"Engie Chile",perfil:{capacidadTotalMW:550,disponibilidadTermico:85,factorHidrologia:74,factorPlantaERNC:38,coberturaPPA:68}},
+    {id:"generadora_met",nombre:"Generadora Metropolitana",perfil:{capacidadTotalMW:300,disponibilidadTermico:82,factorHidrologia:70,factorPlantaERNC:40,coberturaPPA:65}},
+    {id:"cerro_dominador",nombre:"Cerro Dominador",perfil:{capacidadTotalMW:180,disponibilidadTermico:0,factorHidrologia:0,factorPlantaERNC:42,coberturaPPA:80}}
+  ]
+};
+
+// ═══════════════════════════════════════════
+// 3. INDUSTRIAS EMBEBIDAS (resumidas para este archivo; las versiones completas están en JSON externos)
+// ═══════════════════════════════════════════
+const EMBEDDED_INDUSTRIES = {};
+// Minería
+EMBEDDED_INDUSTRIES.mineria = {
+  nombre:"Minería del Cobre",supuestos:{produccionBase:50000,recuperacion:0.85,leyCabezaBase:0.7,factorLibrasPorTon:2204.62,precioAcido:0.15,costoPlantaBase:8,factorAgua:0.45,factorEnergia:0.05},
+  elasticidades:{precioCobre:1.3,ley:-0.7,costoInsumos:-0.6,consumoAgua:-0.5,costoEnergia:-0.4,precioMolibdeno:0.3,precioOro:0.2,precioPlata:0.1,tcrc:-0.4,consumoAcido:-0.3,fletePuerto:-0.3,depreciacion:-0.2,leyCorte:-0.5},
+  incertidumbre:{precioCobre:{min:2.8,max:5.5},ley:{min:0.45,max:0.85},costoInsumos:{min:15,max:30},consumoAgua:{min:0.3,max:0.7},costoEnergia:{min:60,max:130},precioMolibdeno:{min:12,max:30},precioOro:{min:1400,max:2200},precioPlata:{min:16,max:32},tcrc:{min:60,max:110},consumoAcido:{min:2.5,max:5},fletePuerto:{min:12,max:28},depreciacion:{min:40,max:80},leyCorte:{min:0.18,max:0.35}},
+  nodos:[
+    {id:"precioCobre",label:"Precio Cobre (USD/lb)",tipo:"driver",unidades:"USD/lb",elasticidad:1.3},
+    {id:"ley",label:"Ley de Cabeza (%)",tipo:"driver",unidades:"%",elasticidad:-0.7},
+    {id:"costoInsumos",label:"Costo Insumos Mina (USD/ton)",tipo:"driver",unidades:"USD/ton",elasticidad:-0.6},
+    {id:"consumoAgua",label:"Consumo Agua (m³/ton)",tipo:"driver",unidades:"m³/ton",elasticidad:-0.5},
+    {id:"costoEnergia",label:"Costo Energía (USD/MWh)",tipo:"driver",unidades:"USD/MWh",elasticidad:-0.4},
+    {id:"precioMolibdeno",label:"Precio Molibdeno (USD/lb)",tipo:"driver",unidades:"USD/lb",elasticidad:0.3},
+    {id:"precioOro",label:"Precio Oro (USD/oz)",tipo:"driver",unidades:"USD/oz",elasticidad:0.2},
+    {id:"precioPlata",label:"Precio Plata (USD/oz)",tipo:"driver",unidades:"USD/oz",elasticidad:0.1},
+    {id:"tcrc",label:"TC/RC (USD/ton)",tipo:"driver",unidades:"USD/ton",elasticidad:-0.4},
+    {id:"consumoAcido",label:"Consumo Ácido (kg/ton)",tipo:"driver",unidades:"kg/ton",elasticidad:-0.3},
+    {id:"fletePuerto",label:"Flete a Puerto (USD/ton)",tipo:"driver",unidades:"USD/ton",elasticidad:-0.3},
+    {id:"depreciacion",label:"Depreciación (M USD/año)",tipo:"driver",unidades:"M USD/año",elasticidad:-0.2},
+    {id:"leyCorte",label:"Ley de Corte (%)",tipo:"driver",unidades:"%",elasticidad:-0.5},
+    {id:"produccionCobre",label:"Cobre Fino (ton)",tipo:"intermedio",unidades:"ton"},
+    {id:"ebitda",label:"EBITDA (M USD)",tipo:"resultado",unidades:"M USD"},
+    {id:"costoC1",label:"Costo C1 (USD/lb)",tipo:"intermedio",unidades:"USD/lb"},
+    {id:"costoC2",label:"Costo C2 (USD/lb)",tipo:"intermedio",unidades:"USD/lb"},
+    {id:"margenUnitario",label:"Margen (P-C2)",tipo:"intermedio",unidades:"USD/lb"}
+  ],
+  arcos:[
+    {origen:"precioCobre",destino:"ebitda",polaridad:"positivo"},{origen:"ley",destino:"produccionCobre",polaridad:"positivo"},
+    {origen:"costoInsumos",destino:"ebitda",polaridad:"negativo"},{origen:"consumoAgua",destino:"ebitda",polaridad:"negativo"},
+    {origen:"costoEnergia",destino:"ebitda",polaridad:"negativo"},{origen:"precioMolibdeno",destino:"ebitda",polaridad:"positivo"},
+    {origen:"tcrc",destino:"ebitda",polaridad:"negativo"},{origen:"depreciacion",destino:"costoC2",polaridad:"positivo"}
+  ],
+  kpis:[
+    {id:"precioCobre",label:"Precio Cobre",base:4.0,unidades:"USD/lb",formato:"num"},
+    {id:"produccionCobre",label:"Cobre Fino",base:50000,unidades:"ton",formato:"num"},
+    {id:"ebitda",label:"EBITDA",base:0,unidades:"M USD",formato:"dinero"},
+    {id:"costoC1",label:"C1",base:1.80,unidades:"USD/lb",formato:"num"},
+    {id:"costoC2",label:"C2",base:2.10,unidades:"USD/lb",formato:"num"},
+    {id:"margenUnitario",label:"Margen",base:1.90,unidades:"USD/lb",formato:"num"}
+  ],
+  cadenas:[
+    {nombre:"Caída precio cobre",descripcion:"Menor ingreso → reduce EBITDA → puede activar revisión de ley de corte",impacto:"Alto",polaridad:"negativo"},
+    {nombre:"Alza de insumos",descripcion:"Mayores costos → C1/C2 suben → comprime márgenes",impacto:"Significativo",polaridad:"negativo"}
+  ],
+  escenarios:[
+    {nombre:"Base",palancas:{precioCobre:4.0,ley:0.65,costoInsumos:22,consumoAgua:0.5,costoEnergia:90,precioMolibdeno:20,precioOro:1850,precioPlata:24,tcrc:80,consumoAcido:3.5,fletePuerto:18,depreciacion:60,leyCorte:0.25}},
+    {nombre:"Superciclo",palancas:{precioCobre:5.5,ley:0.72,costoInsumos:20,consumoAgua:0.45,costoEnergia:75,precioMolibdeno:25,precioOro:2000,precioPlata:28,tcrc:70,consumoAcido:3.2,fletePuerto:16,depreciacion:58,leyCorte:0.22}}
+  ],
+  initState:{precioCobre:4.0,ley:0.65,costoInsumos:22,consumoAgua:0.5,costoEnergia:90,precioMolibdeno:20,precioOro:1850,precioPlata:24,tcrc:80,consumoAcido:3.5,fletePuerto:18,depreciacion:60,leyCorte:0.25},
+  formulaPrincipal:"function(p,s,ctx){var prod=s.produccionBase*(p.ley/s.leyCabezaBase);if(p.ley<p.leyCorte){prod=prod*Math.pow(p.ley/p.leyCorte,2);}prod=Math.max(1000,prod);var mineral=prod/(p.ley/100*s.recuperacion);var ingCu=prod*s.factorLibrasPorTon*p.precioCobre;var ingMo=mineral*0.0002*s.recuperacion*s.factorLibrasPorTon*(p.precioMolibdeno||20);var ingAu=mineral*0.2*s.recuperacion/31.1035*(p.precioOro||1850);var ingAg=mineral*2*s.recuperacion/31.1035*(p.precioPlata||24);var ingSub=ingMo+ingAu+ingAg;var ingTotal=ingCu+ingSub;var costoMina=mineral*(p.costoInsumos+p.consumoAcido*s.precioAcido);var costoPlanta=mineral*(p.consumoAgua*s.factorAgua+p.costoEnergia*s.factorEnergia+s.costoPlantaBase);var costoFlete=mineral*p.fletePuerto;var costoTC=prod*p.tcrc;var costoOp=costoMina+costoPlanta+costoFlete+costoTC;var ebitda=(ingTotal-costoOp)/1_000_000;var costoTotal=costoOp+(p.depreciacion*1_000_000);var c1=costoOp/(prod*s.factorLibrasPorTon);var c2=costoTotal/(prod*s.factorLibrasPorTon);var margen=p.precioCobre-c2;return{produccionCobre:Math.round(prod),ebitda:+ebitda.toFixed(2),costoC1:+c1.toFixed(2),costoC2:+c2.toFixed(2),margenUnitario:+margen.toFixed(2)};}"
+};
+// Clínica
+EMBEDDED_INDUSTRIES.clinica = {
+  nombre:"Clínica Privada",supuestos:{camas:85,costoFijoPorCama:85000000,factorReadmision:0.45,diasAno:365},
+  elasticidades:{ocupacion:1.2,estancia:-0.75,readmision:-0.62,tarifa:1.05,costoInsumos:-0.4,inflacion:-0.88},
+  incertidumbre:{ocupacion:{min:65,max:98},estancia:{min:2.5,max:7},readmision:{min:1.5,max:8},tarifa:{min:220,max:450},costoInsumos:{min:120,max:300},inflacion:{min:2,max:12}},
+  nodos:[
+    {id:"ocupacion",label:"Ocupación (%)",tipo:"driver",unidades:"%",elasticidad:1.2},
+    {id:"estancia",label:"Estancia Media (días)",tipo:"driver",unidades:"días",elasticidad:-0.75},
+    {id:"readmision",label:"Readmisión (%)",tipo:"driver",unidades:"%",elasticidad:-0.62},
+    {id:"tarifa",label:"Tarifa Día-Cama ($k)",tipo:"driver",unidades:"$k",elasticidad:1.05},
+    {id:"costoInsumos",label:"Costo Insumos/Pac ($k)",tipo:"driver",unidades:"$k",elasticidad:-0.4},
+    {id:"inflacion",label:"Inflación Salud (%)",tipo:"driver",unidades:"%",elasticidad:-0.88},
+    {id:"volumen",label:"Vol. Pacientes/año",tipo:"intermedio",unidades:"pac."},
+    {id:"margen",label:"Margen Oper. (M CLP)",tipo:"resultado",unidades:"M CLP"},
+    {id:"calidad",label:"Calidad Índice",tipo:"intermedio",unidades:"/100"}
+  ],
+  arcos:[
+    {origen:"ocupacion",destino:"volumen",polaridad:"positivo"},{origen:"estancia",destino:"volumen",polaridad:"negativo"},
+    {origen:"readmision",destino:"margen",polaridad:"negativo"},{origen:"tarifa",destino:"margen",polaridad:"positivo"},
+    {origen:"costoInsumos",destino:"margen",polaridad:"negativo"},{origen:"inflacion",destino:"margen",polaridad:"negativo"}
+  ],
+  kpis:[
+    {id:"ocupacion",label:"Ocupación",base:82,unidades:"%",formato:"num"},{id:"estancia",label:"Estancia",base:3.8,unidades:"días",formato:"num"},
+    {id:"margen",label:"Margen",base:0,unidades:"M CLP",formato:"dinero"},{id:"volumen",label:"Vol. Pac.",base:0,unidades:"pac.",formato:"num"},
+    {id:"calidad",label:"Calidad",base:68,unidades:"/100",formato:"num"}
+  ],
+  cadenas:[
+    {nombre:"Ocupación elevada",descripcion:"Congestión → calidad ↓ y costos ↑",impacto:"Riesgo operacional",polaridad:"negativo"},
+    {nombre:"Mejora de tarifa",descripcion:"Ingreso/paciente ↑ → margen ↑",impacto:"Positivo",polaridad:"positivo"}
+  ],
+  escenarios:[
+    {nombre:"Base",palancas:{ocupacion:82,estancia:3.8,readmision:3.2,tarifa:310,costoInsumos:185,inflacion:4.2}},
+    {nombre:"Alta Demanda",palancas:{ocupacion:90,estancia:3.5,readmision:2.8,tarifa:330,costoInsumos:170,inflacion:4.5}}
+  ],
+  initState:{ocupacion:82,estancia:3.8,readmision:3.2,tarifa:310,costoInsumos:185,inflacion:4.2},
+  formulaPrincipal:"function(p,s,ctx){var rot=s.diasAno/Math.max(p.estancia,0.5);var volBase=s.camas*(p.ocupacion/100)*rot;var cong=p.ocupacion>85?1+(p.ocupacion-85)*0.0025:1;var vol=Math.round(volBase/cong);var ing=vol*p.tarifa*1000*p.estancia;var cRead=vol*(p.readmision/100)*p.tarifa*1000*p.estancia*s.factorReadmision;var ingNeto=ing-cRead;var cVar=vol*(p.costoInsumos*1000);var cFijo=s.camas*s.costoFijoPorCama;var aInf=1+(p.inflacion/100);var cTotal=(cVar+cFijo)*aInf;var margen=(ingNeto-cTotal)/1_000_000;var cal=Math.min(100,Math.max(0,60-(p.readmision-2.5)*8-(p.estancia-3.0)*5+(p.ocupacion<93?10:-5)));return{volumen:vol,margen:+margen.toFixed(2),calidad:Math.round(cal)};}"
+};
+// Hospital
+EMBEDDED_INDUSTRIES.hospital = {
+  nombre:"Hospital Público",supuestos:{camas:250,presupuestoBase:42000000000,arancelGRD:1850000,leInicial:5200,diasAno:365},
+  elasticidades:{ocupacion:1.2,estancia:-0.75,readmision:-0.6,costoInsumos:-0.5,avanceLE:0.9,ejecucion:-0.5,inflacion:-0.4},
+  incertidumbre:{ocupacion:{min:70,max:98},estancia:{min:3.5,max:8},readmision:{min:2,max:8},costoInsumos:{min:150,max:350},avanceLE:{min:0,max:30},ejecucion:{min:85,max:110},inflacion:{min:2,max:10}},
+  nodos:[
+    {id:"ocupacion",label:"Ocupación (%)",tipo:"driver",unidades:"%",elasticidad:1.2},{id:"estancia",label:"Estancia Media (días)",tipo:"driver",unidades:"días",elasticidad:-0.75},
+    {id:"readmision",label:"Readmisión (%)",tipo:"driver",unidades:"%",elasticidad:-0.6},{id:"costoInsumos",label:"Costo Insumos/Egreso ($k)",tipo:"driver",unidades:"$k",elasticidad:-0.5},
+    {id:"avanceLE",label:"Avance Lista Espera (%)",tipo:"driver",unidades:"%",elasticidad:0.9},{id:"ejecucion",label:"Ejecución Presupuesto (%)",tipo:"driver",unidades:"%",elasticidad:-0.5},
+    {id:"inflacion",label:"Inflación Salud (%)",tipo:"driver",unidades:"%",elasticidad:-0.4},{id:"egresos",label:"Egresos",tipo:"intermedio",unidades:"pac."},
+    {id:"deficitPct",label:"Déficit %",tipo:"resultado",unidades:"%"},{id:"listaEspera",label:"Lista Espera",tipo:"intermedio",unidades:"casos"}
+  ],
+  arcos:[
+    {origen:"ocupacion",destino:"egresos",polaridad:"positivo"},{origen:"estancia",destino:"egresos",polaridad:"negativo"},
+    {origen:"readmision",destino:"deficitPct",polaridad:"negativo"},{origen:"costoInsumos",destino:"deficitPct",polaridad:"negativo"},
+    {origen:"avanceLE",destino:"listaEspera",polaridad:"negativo"},{origen:"ejecucion",destino:"deficitPct",polaridad:"positivo"}
+  ],
+  kpis:[
+    {id:"ocupacion",label:"Ocupación",base:84,unidades:"%",formato:"num"},{id:"estancia",label:"Estancia",base:5.2,unidades:"días",formato:"num"},
+    {id:"egresos",label:"Egresos",base:0,unidades:"pac.",formato:"num"},{id:"deficitPct",label:"Déficit %",base:0,unidades:"%",formato:"num"},
+    {id:"listaEspera",label:"Lista Espera",base:5200,unidades:"casos",formato:"num"}
+  ],
+  cadenas:[
+    {nombre:"Aumento ocupación",descripcion:"Más egresos → menor déficit",impacto:"Reduce déficit",polaridad:"positivo"},
+    {nombre:"Bajo avance LE",descripcion:"LE crece → riesgo sanción",impacto:"Riesgo MINSAL",polaridad:"negativo"}
+  ],
+  escenarios:[
+    {nombre:"Base",palancas:{ocupacion:84,estancia:5.2,readmision:4.0,costoInsumos:220,avanceLE:12,ejecucion:96,inflacion:4.2}},
+    {nombre:"Crisis LE",palancas:{ocupacion:92,estancia:6.0,readmision:5.5,costoInsumos:260,avanceLE:5,ejecucion:102,inflacion:5.0}}
+  ],
+  initState:{ocupacion:84,estancia:5.2,readmision:4.0,costoInsumos:220,avanceLE:12,ejecucion:96,inflacion:4.2},
+  formulaPrincipal:"function(p,s,ctx){var rot=s.diasAno/Math.max(p.estancia,0.5);var egrBase=Math.round(s.camas*(p.ocupacion/100)*rot);var cong=p.ocupacion>92?1+(p.ocupacion-92)*0.004:1;var egr=Math.round(egrBase/cong);var pGRD=egr*1.25;var ingGRD=pGRD*s.arancelGRD;var presEj=s.presupuestoBase*(p.ejecucion/100);var cFijo=s.camas*112000000;var cVar=egr*(p.costoInsumos*1000);var aInf=1+(p.inflacion/100);var gTotal=(cFijo+cVar)*aInf;var finTotal=ingGRD+presEj;var deficit=gTotal-finTotal;var defPct=(deficit/presEj)*100;var le=Math.round(s.leInicial-s.leInicial*(p.avanceLE/100)+egr*0.15);return{egresos:egr,deficitPct:+defPct.toFixed(1),listaEspera:le};}"
+};
+// Acuícola
+EMBEDDED_INDUSTRIES.acuicola = {
+  nombre:"Acuícola (Salmón)",supuestos:{biomasaInicial:12500,costoAlimento:1200},
+  elasticidades:{fcr:-0.92,mort:-0.85,calig:-0.65,yield:0.88,price:1.10,fx:0,temp:-0.3},
+  incertidumbre:{fcr:{min:1.0,max:1.8},mort:{min:3,max:22},calig:{min:0,max:9},yield:{min:72,max:94},price:{min:3,max:8},fx:{min:700,max:1000},temp:{min:9,max:17}},
+  nodos:[
+    {id:"fcr",label:"FCR",tipo:"driver",unidades:"",elasticidad:-0.92},{id:"mort",label:"Mortalidad (%)",tipo:"driver",unidades:"%",elasticidad:-0.85},
+    {id:"calig",label:"Caligus (índice)",tipo:"driver",unidades:"índice",elasticidad:-0.65},{id:"yield",label:"Yield Planta (%)",tipo:"driver",unidades:"%",elasticidad:0.88},
+    {id:"price",label:"Precio USD/kg",tipo:"driver",unidades:"$/kg",elasticidad:1.10},{id:"fx",label:"Tipo Cambio (CLP)",tipo:"driver",unidades:"CLP",elasticidad:0},
+    {id:"temp",label:"Temp. Mar (°C)",tipo:"driver",unidades:"°C",elasticidad:-0.3},{id:"biomasa",label:"Biomasa (ton)",tipo:"intermedio",unidades:"ton"},
+    {id:"ebitda",label:"EBITDA (M USD)",tipo:"resultado",unidades:"M USD"}
+  ],
+  arcos:[
+    {origen:"fcr",destino:"ebitda",polaridad:"negativo"},{origen:"mort",destino:"biomasa",polaridad:"negativo"},
+    {origen:"calig",destino:"ebitda",polaridad:"negativo"},{origen:"yield",destino:"ebitda",polaridad:"positivo"},
+    {origen:"price",destino:"ebitda",polaridad:"positivo"},{origen:"fx",destino:"ebitda",polaridad:"positivo"}
+  ],
+  kpis:[
+    {id:"fcr",label:"FCR",base:1.3,unidades:"",formato:"num"},{id:"mort",label:"Mortalidad",base:8,unidades:"%",formato:"num"},
+    {id:"calig",label:"Caligus",base:3,unidades:"índice",formato:"num"},{id:"ebitda",label:"EBITDA",base:0,unidades:"M USD",formato:"dinero"}
+  ],
+  cadenas:[
+    {nombre:"FCR alto",descripcion:"Costo alimento ↑ → EBITDA ↓",impacto:"-$8.5M",polaridad:"negativo"},
+    {nombre:"Mortalidad elevada",descripcion:"Biomasa ↓ → Volumen ↓ → Ingreso ↓",impacto:"-$12M",polaridad:"negativo"}
+  ],
+  escenarios:[
+    {nombre:"Base",palancas:{fcr:1.3,mort:8,calig:3,yield:82,price:5.5,fx:850,temp:12}},
+    {nombre:"Crisis Sanitaria",palancas:{fcr:1.5,mort:15,calig:7,yield:78,price:4.8,fx:880,temp:16}}
+  ],
+  initState:{fcr:1.3,mort:8,calig:3,yield:82,price:5.5,fx:850,temp:12},
+  formulaPrincipal:"function(p,s,ctx){var biomasa=s.biomasaInicial*(1-p.mort/100);var vol=biomasa*(p.yield/100);var ing=vol*p.price*1000*p.fx;var cAlim=s.biomasaInicial*p.fcr*s.costoAlimento*1000;var factorTemp=(p.temp||12)>14?1+((p.temp||12)-14)*0.08:1;var cSan=(1500+p.calig*250)*1000*factorTemp;var otros=s.biomasaInicial*500*1000;var ebitda=(ing-cAlim-cSan-otros)/1_000_000;return{biomasa:Math.round(biomasa),ebitda:+ebitda.toFixed(2)};}"
+};
+// Retail
+EMBEDDED_INDUSTRIES.retail = {
+  nombre:"Retail",supuestos:{tiendas:45,costoFijoPorTienda:85000000,diasAno:365},
+  elasticidades:{trafico:0.9,ticketPromedio:1.2,tasaConversion:0.7,margenBrutoPct:0.8,costoLogisticaPct:-0.5,mermaPct:-0.4,penetracionOnline:0.7,costoArriendo:-0.45,gastoMarketing:0.5},
+  incertidumbre:{trafico:{min:50,max:120},ticketPromedio:{min:8000,max:18000},tasaConversion:{min:12,max:35}},
+  nodos:[
+    {id:"trafico",label:"Tráfico (miles/día)",tipo:"driver",unidades:"miles",elasticidad:0.9},
+    {id:"ticketPromedio",label:"Ticket ($)",tipo:"driver",unidades:"CLP",elasticidad:1.2},
+    {id:"mermaPct",label:"Merma (%)",tipo:"driver",unidades:"%",elasticidad:-0.4},
+    {id:"penetracionOnline",label:"Online (%)",tipo:"driver",unidades:"%",elasticidad:0.7},
+    {id:"ebitda",label:"EBITDA (M CLP)",tipo:"resultado",unidades:"M CLP"}
+  ],
+  kpis:[
+    {id:"trafico",label:"Tráfico",base:85,unidades:"miles",formato:"num"},
+    {id:"ticketPromedio",label:"Ticket",base:12500,unidades:"CLP",formato:"num"},
+    {id:"ebitda",label:"EBITDA",base:0,unidades:"M CLP",formato:"dinero"}
+  ],
+  cadenas:[{nombre:"Caída tráfico",descripcion:"Menos visitas → EBITDA ↓",impacto:"Alto",polaridad:"negativo"}],
+  escenarios:[{nombre:"Base",palancas:{trafico:85,ticketPromedio:12500,tasaConversion:22,margenBrutoPct:42,costoLogisticaPct:8,mermaPct:2.8,penetracionOnline:18,costoArriendo:4.5,gastoMarketing:120}}],
+  initState:{trafico:85,ticketPromedio:12500,tasaConversion:22,margenBrutoPct:42,costoLogisticaPct:8,mermaPct:2.8,penetracionOnline:18,costoArriendo:4.5,gastoMarketing:120},
+  formulaPrincipal:"function(p,s,ctx){var ingBruto=s.tiendas*p.trafico*1000*p.ticketPromedio*s.diasAno;var mg=ingBruto*(p.margenBrutoPct/100);var cLog=ingBruto*(p.costoLogisticaPct/100);var cMer=ingBruto*(p.mermaPct/100);var ingOn=ingBruto*(p.penetracionOnline/100);var cOn=ingOn*0.12;var cArr=s.tiendas*p.costoArriendo*12*1e6;var cMkt=p.gastoMarketing*1e6;var cFijo=s.tiendas*s.costoFijoPorTienda;var ebitda=(mg-cLog-cMer-cOn-cArr-cMkt-cFijo)/1_000_000;return{ebitda:+ebitda.toFixed(2)};}"
+};
+// Logística
+EMBEDDED_INDUSTRIES.logistica = {
+  nombre:"Logística",supuestos:{flotaPropia:80,flotaSubcontratada:40,diasOp:312},
+  elasticidades:{ocupacionFlota:0.9,tarifaFlete:1.1,precioCombustible:-0.7,tasaAtrasos:-0.5},
+  incertidumbre:{ocupacionFlota:{min:65,max:98},tarifaFlete:{min:2.0,max:4.5},precioCombustible:{min:800,max:1600}},
+  nodos:[
+    {id:"ocupacionFlota",label:"Ocupación (%)",tipo:"driver",unidades:"%",elasticidad:0.9},
+    {id:"tarifaFlete",label:"Tarifa (CLP/km)",tipo:"driver",unidades:"CLP",elasticidad:1.1},
+    {id:"precioCombustible",label:"Combustible (CLP/L)",tipo:"driver",unidades:"CLP",elasticidad:-0.7},
+    {id:"tasaAtrasos",label:"Atrasos (%)",tipo:"driver",unidades:"%",elasticidad:-0.5},
+    {id:"ebitda",label:"EBITDA (M CLP)",tipo:"resultado",unidades:"M CLP"}
+  ],
+  kpis:[
+    {id:"ocupacionFlota",label:"Ocupación",base:85,unidades:"%",formato:"num"},
+    {id:"tarifaFlete",label:"Tarifa",base:2.8,unidades:"CLP/km",formato:"num"},
+    {id:"ebitda",label:"EBITDA",base:0,unidades:"M CLP",formato:"dinero"}
+  ],
+  cadenas:[{nombre:"Alza combustible",descripcion:"Costo/km ↑ → EBITDA ↓",impacto:"Negativo",polaridad:"negativo"}],
+  escenarios:[{nombre:"Base",palancas:{ocupacionFlota:85,tarifaFlete:2.8,precioCombustible:1050,tasaAtrasos:8,tasaSiniestralidad:2.5,costoNeumaticos:0.18,congestionRuta:15}}],
+  initState:{ocupacionFlota:85,tarifaFlete:2.8,precioCombustible:1050,tasaAtrasos:8,tasaSiniestralidad:2.5,costoNeumaticos:0.18,congestionRuta:15},
+  formulaPrincipal:"function(p,s,ctx){var kmTotal=(s.flotaPropia*p.ocupacionFlota/100+s.flotaSubcontratada*(p.ocupacionFlota-8)/100)*1800*s.diasOp;var ing=kmTotal*p.tarifaFlete;var costoKm=p.precioCombustible*0.35+(p.costoNeumaticos||0.18)+0.45;var cVar=kmTotal*costoKm;var cFijo=(s.flotaPropia+s.flotaSubcontratada)*1.5e6*12;var ebitda=(ing-cVar-cFijo)/1_000_000;return{ebitda:+ebitda.toFixed(2)};}"
+};
+// Telecom
+EMBEDDED_INDUSTRIES.telecom = {
+  nombre:"Telecomunicaciones",supuestos:{suscriptoresMoviles:1.8e6,suscriptoresFijos:400000},
+  elasticidades:{arpuMovil:1.1,churnVoluntario:-0.8,calidadServicio:0.9},
+  incertidumbre:{arpuMovil:{min:6000,max:16000},churnVoluntario:{min:1,max:6}},
+  nodos:[
+    {id:"arpuMovil",label:"ARPU Móvil ($)",tipo:"driver",unidades:"CLP",elasticidad:1.1},
+    {id:"churnVoluntario",label:"Churn (%)",tipo:"driver",unidades:"%",elasticidad:-0.8},
+    {id:"calidadServicio",label:"Calidad (%)",tipo:"driver",unidades:"%",elasticidad:0.9},
+    {id:"ebitda",label:"EBITDA (M CLP)",tipo:"resultado",unidades:"M CLP"}
+  ],
+  kpis:[
+    {id:"arpuMovil",label:"ARPU Móvil",base:9800,unidades:"CLP",formato:"num"},
+    {id:"churnVoluntario",label:"Churn",base:2.2,unidades:"%",formato:"num"},
+    {id:"ebitda",label:"EBITDA",base:0,unidades:"M CLP",formato:"dinero"}
+  ],
+  cadenas:[{nombre:"Caída ARPU",descripcion:"OTT erosionan ingresos → EBITDA ↓",impacto:"Estructural",polaridad:"negativo"}],
+  escenarios:[{nombre:"Base",palancas:{arpuMovil:9800,arpuFijo:14500,churnVoluntario:2.2,churnInvoluntario:1.5,calidadServicio:94,penetracionOTT:55,quejasSubtel:120,atencionCliente:72,capexEspectro:8500}}],
+  initState:{arpuMovil:9800,arpuFijo:14500,churnVoluntario:2.2,churnInvoluntario:1.5,calidadServicio:94,penetracionOTT:55,quejasSubtel:120,atencionCliente:72,capexEspectro:8500},
+  formulaPrincipal:"function(p,s,ctx){var sus=s.suscriptoresMoviles+s.suscriptoresFijos;var ing=sus*p.arpuMovil*12*0.85+sus*(p.arpuFijo||14500)*12*0.15;var churn=(p.churnVoluntario+(p.churnInvoluntario||1.5))/100;var susNetos=Math.round(sus*(1-churn));var costos=susNetos*42000+((p.capexEspectro||8500)*1e6);var ebitda=(ing-costos)/1_000_000;return{ebitda:+ebitda.toFixed(2)};}"
+};
+// Agroindustria
+EMBEDDED_INDUSTRIES.agro = {
+  nombre:"Agroindustria",supuestos:{hectareas:850,rendimientoBase:28},
+  elasticidades:{rendimiento:0.9,precioExportacion:1.2,costoAgua:-0.5,incidenciaPlagas:-0.6,tipoCambio:1.0},
+  incertidumbre:{rendimiento:{min:60,max:105},precioExportacion:{min:2.5,max:7}},
+  nodos:[
+    {id:"rendimiento",label:"Rendimiento (%)",tipo:"driver",unidades:"%",elasticidad:0.9},
+    {id:"precioExportacion",label:"Precio Exp. (USD/kg)",tipo:"driver",unidades:"USD/kg",elasticidad:1.2},
+    {id:"incidenciaPlagas",label:"Plagas (%)",tipo:"driver",unidades:"%",elasticidad:-0.6},
+    {id:"tipoCambio",label:"Tipo Cambio (CLP)",tipo:"driver",unidades:"CLP",elasticidad:1.0},
+    {id:"ebitda",label:"EBITDA (M USD)",tipo:"resultado",unidades:"M USD"}
+  ],
+  kpis:[
+    {id:"rendimiento",label:"Rendimiento",base:92,unidades:"%",formato:"num"},
+    {id:"precioExportacion",label:"Precio Exp.",base:4.8,unidades:"USD/kg",formato:"num"},
+    {id:"ebitda",label:"EBITDA",base:0,unidades:"M USD",formato:"dinero"}
+  ],
+  cadenas:[{nombre:"Sequía",descripcion:"Rendimiento ↓ → EBITDA ↓",impacto:"Climático",polaridad:"negativo"}],
+  escenarios:[{nombre:"Base",palancas:{rendimiento:92,precioExportacion:4.8,costoAgua:280,incidenciaPlagas:5.5,tipoCambio:900,costoManoObra:28000,riegoTecnificado:35,certificacionGlobalGAP:85,fleteMaritimo:145,tasaRechazoPacking:3.5}}],
+  initState:{rendimiento:92,precioExportacion:4.8,costoAgua:280,incidenciaPlagas:5.5,tipoCambio:900,costoManoObra:28000,riegoTecnificado:35,certificacionGlobalGAP:85,fleteMaritimo:145,tasaRechazoPacking:3.5},
+  formulaPrincipal:"function(p,s,ctx){var prod=s.hectareas*s.rendimientoBase*(p.rendimiento/100);var exportKg=prod*(1-(p.incidenciaPlagas||5)*0.01-(p.tasaRechazoPacking||3.5)/100)*1000;var ing=exportKg*p.precioExportacion;var cTotal=(prod*(p.costoAgua||280)*650+prod*(p.costoManoObra||28000)*12+s.hectareas*3.2e6)/(p.tipoCambio||900);var ebitda=(ing-cTotal)/1_000_000;return{ebitda:+ebitda.toFixed(2)};}"
+};
+// Energía
+EMBEDDED_INDUSTRIES.energia = {
+  nombre:"Energía",supuestos:{capacidadTotalMW:500,mixHidro:0.30,mixTermico:0.40,mixERNC:0.30,horasAno:8760},
+  elasticidades:{precioSpot:0.8,disponibilidadTermico:0.7,factorHidrologia:0.5,factorPlantaERNC:0.7,precioGas:-0.6,coberturaPPA:0.9,tipoCambio:1.0},
+  incertidumbre:{precioSpot:{min:35,max:150},factorHidrologia:{min:25,max:100}},
+  nodos:[
+    {id:"precioSpot",label:"Precio Spot (USD/MWh)",tipo:"driver",unidades:"USD",elasticidad:0.8},
+    {id:"disponibilidadTermico",label:"Disp. Térmica (%)",tipo:"driver",unidades:"%",elasticidad:0.7},
+    {id:"factorHidrologia",label:"Hidrología (%)",tipo:"driver",unidades:"%",elasticidad:0.5},
+    {id:"factorPlantaERNC",label:"Planta ERNC (%)",tipo:"driver",unidades:"%",elasticidad:0.7},
+    {id:"precioGas",label:"Gas (USD/MMBtu)",tipo:"driver",unidades:"USD",elasticidad:-0.6},
+    {id:"ebitda",label:"EBITDA (M USD)",tipo:"resultado",unidades:"M USD"}
+  ],
+  kpis:[
+    {id:"precioSpot",label:"Spot",base:80,unidades:"USD/MWh",formato:"num"},
+    {id:"disponibilidadTermico",label:"Disp.Térm.",base:88,unidades:"%",formato:"num"},
+    {id:"ebitda",label:"EBITDA",base:0,unidades:"M USD",formato:"dinero"}
+  ],
+  cadenas:[{nombre:"Sequía",descripcion:"Hidrología ↓ → EBITDA ↓",impacto:"Negativo",polaridad:"negativo"}],
+  escenarios:[{nombre:"Base",palancas:{precioSpot:80,disponibilidadTermico:88,factorHidrologia:75,factorPlantaERNC:32,precioGas:6.5,precioCarbon:110,coberturaPPA:70,tipoCambio:900,capacidadBaterias:15,restriccionTransmision:12,impuestoVerde:5,costoMantenimientoMayor:4.5}}],
+  initState:{precioSpot:80,disponibilidadTermico:88,factorHidrologia:75,factorPlantaERNC:32,precioGas:6.5,precioCarbon:110,coberturaPPA:70,tipoCambio:900,capacidadBaterias:15,restriccionTransmision:12,impuestoVerde:5,costoMantenimientoMayor:4.5},
+  formulaPrincipal:"function(p,s,ctx){var cap=s.capacidadTotalMW;var h=s.horasAno;var gHidro=cap*s.mixHidro*h*(p.factorHidrologia/100);var gTermico=cap*s.mixTermico*h*(p.disponibilidadTermico/100);var gERNC=cap*s.mixERNC*h*(p.factorPlantaERNC/100);var gTotal=gHidro+gTermico+gERNC;var volPPA=gTotal*(p.coberturaPPA/100);var ingPPA=volPPA*65;var volSpot=gTotal-volPPA;var spotEf=p.precioSpot*(1-(p.restriccionTransmision||12)/150);var ingSpot=volSpot*spotEf;var cHidro=gHidro*8;var cTerm=gTermico*(p.precioGas*0.8+25+(p.precioCarbon||110)*0.02);var cERNC=gERNC*5;var ebitda=(ingPPA+ingSpot-cHidro-cTerm-cERNC)/1_000_000;return{ebitda:+ebitda.toFixed(2)};}"
+};
+
+// ═══════════════════════════════════════════
+// 4. ESTADO GLOBAL
+// ═══════════════════════════════════════════
+let industriaActual = null;
+let perfilCliente = {};
+let perfilClienteB = {};
+let estadoActual = {};
+let estadoB = null;
+let estadoAnclado = null;
+let chartInst = null;
+let proyeccionChart = null;
+let modoPresentacion = false;
+
+// ═══════════════════════════════════════════
+// 5. FUNCIONES DEL MOTOR
+// ═══════════════════════════════════════════
+function obtenerFormula(ind) {
+  if (typeof ind.formulaPrincipal === 'function') return ind.formulaPrincipal;
+  if (typeof ind.formulaPrincipal === 'string') {
+    try { return eval('(' + ind.formulaPrincipal + ')'); }
+    catch(e) { console.error(e); return () => ({}); }
+  }
+  return () => ({});
+}
+
+function simular(palancas) {
+  if (!industriaActual) return {};
+  const formula = obtenerFormula(industriaActual);
+  const sup = {...(industriaActual.supuestos||{}), ...perfilCliente};
+  try { return formula(palancas, sup, CTX); }
+  catch(e) { console.error(e); return {}; }
+}
+
+function leerPalancas() {
+  if (!industriaActual) return {};
+  const p = {};
+  (industriaActual.nodos||[]).filter(n=>n.tipo==='driver').forEach(n=>{
+    const slider = document.getElementById('sl-'+n.id);
+    p[n.id] = slider ? parseFloat(slider.value) : (industriaActual.initState[n.id]||0);
+  });
+  return p;
+}
+
+function actualizar() {
+  const palancas = leerPalancas();
+  estadoActual = simular(palancas);
+  if (Object.keys(perfilClienteB).length > 0) {
+    const formula = obtenerFormula(industriaActual);
+    const supB = {...(industriaActual.supuestos||{}), ...perfilClienteB};
+    try { estadoB = formula(palancas, supB, CTX); } catch(e) { estadoB = null; }
+  } else { estadoB = null; }
+  renderKPIs(); renderBoardroom(); renderCadenas();
+}
+
+// ═══════════════════════════════════════════
+// 6. UI
+// ═══════════════════════════════════════════
+function construirSidebar() {
+  if (!industriaActual) return;
+  const container = document.getElementById('palancasContainer');
+  container.innerHTML = '';
+  (industriaActual.nodos||[]).filter(n=>n.tipo==='driver').forEach(n=>{
+    const init = industriaActual.initState[n.id]||0;
+    const inc = (industriaActual.incertidumbre||{})[n.id]||{};
+    const min = inc.min!==undefined ? inc.min : 0;
+    const max = inc.max!==undefined ? inc.max : init*2;
+    const div = document.createElement('div'); div.className='palanca';
+    div.innerHTML=`<label><span>${n.label}</span><span id="val-${n.id}" style="font-size:.7rem;color:var(--teal)">${init}</span></label>
+      <input type="range" id="sl-${n.id}" min="${min}" max="${max}" value="${init}" step="${(max-min)/200}">
+      <div class="range-labels"><span>${min}</span><span>${max}</span></div>`;
+    container.appendChild(div);
+    document.getElementById('sl-'+n.id).addEventListener('input', ()=>{
+      const s=document.getElementById('sl-'+n.id), v=document.getElementById('val-'+n.id);
+      if(s&&v) v.textContent=parseFloat(s.value).toFixed(2);
+      actualizar();
+    });
+  });
+  // Escenarios
+  const sel=document.getElementById('scenarioSelect');
+  sel.innerHTML='<option value="">— Personalizado —</option>';
+  (industriaActual.escenarios||[]).forEach((esc,i)=>{
+    const opt=document.createElement('option'); opt.value=i; opt.textContent=esc.nombre; sel.appendChild(opt);
+  });
+}
+
+function poblarEmpresas() {
+  const key = document.getElementById('industrySelect').value;
+  const sel = document.getElementById('companySelect');
+  sel.innerHTML = '';
+  const companies = COMPANIES[key]||[];
+  companies.forEach(c=>sel.appendChild(new Option(c.nombre, c.id)));
+  const selB = document.getElementById('companySelectB');
+  selB.innerHTML = '<option value="">— Sin comparar —</option>';
+  companies.forEach(c=>selB.appendChild(new Option(c.nombre, c.id)));
+  if (companies.length>0) cargarEmpresa(companies[0].id);
+}
+
+function cargarEmpresa(id) {
+  const key = document.getElementById('industrySelect').value;
+  const company = (COMPANIES[key]||[]).find(c=>c.id===id);
+  if (!company) return;
+  if (EMBEDDED_INDUSTRIES[key]) {
+    const ind = JSON.parse(JSON.stringify(EMBEDDED_INDUSTRIES[key]));
+    if (typeof ind.formulaPrincipal==='string') ind.formulaPrincipal=eval('('+ind.formulaPrincipal+')');
+    industriaActual = ind;
+  }
+  perfilCliente = {...(company.perfil||{})};
+  document.getElementById('empresaBadge').textContent=company.nombre;
+  document.getElementById('empresaBadge').style.display='inline-block';
+  construirSidebar();
+  Object.entries(company.perfil||{}).forEach(([k,v])=>{
+    const sl=document.getElementById('sl-'+k), vl=document.getElementById('val-'+k);
+    if(sl){sl.value=v; if(vl)vl.textContent=v;}
+  });
+  actualizar();
+}
+
+function cargarEmpresaB(id) {
+  if (!id) { perfilClienteB={}; estadoB=null; actualizar(); return; }
+  const key = document.getElementById('industrySelect').value;
+  const company = (COMPANIES[key]||[]).find(c=>c.id===id);
+  if (!company) return;
+  perfilClienteB = {...(company.perfil||{})};
+  actualizar();
+}
+
+function loadScenario(idx) {
+  if (!industriaActual||idx==='') return;
+  const esc = industriaActual.escenarios[parseInt(idx)];
+  if (!esc) return;
+  Object.entries(esc.palancas).forEach(([id,val])=>{
+    const sl=document.getElementById('sl-'+id), vl=document.getElementById('val-'+id);
+    if(sl){sl.value=val; if(vl)vl.textContent=val;}
+  });
+  actualizar();
+}
+
+function resetSliders() {
+  if (!industriaActual) return;
+  Object.entries(industriaActual.initState||{}).forEach(([id,val])=>{
+    const sl=document.getElementById('sl-'+id), vl=document.getElementById('val-'+id);
+    if(sl){sl.value=val; if(vl)vl.textContent=val;}
+  });
+  actualizar();
+}
+
+function renderKPIs() {
+  const container = document.getElementById('kpiContainer');
+  if (!industriaActual) return container.innerHTML='';
+  container.innerHTML='';
+  (industriaActual.kpis||[]).forEach(kpi=>{
+    const val = estadoActual[kpi.id]!==undefined ? estadoActual[kpi.id] : 0;
+    let f, fB='';
+    if (kpi.formato==='dinero') f='$'+Number(val).toFixed(1)+'M';
+    else if (kpi.formato==='porcentaje') f=Number(val).toFixed(1)+'%';
+    else f=Number.isInteger(val)?val:Number(val).toFixed(2);
+    if (estadoB && estadoB[kpi.id]!==undefined) {
+      const valB=estadoB[kpi.id];
+      if (kpi.formato==='dinero') fB='$'+Number(valB).toFixed(1)+'M';
+      else fB=Number(valB).toFixed(2);
+    }
+    let semaforo='';
+    const base=kpi.base||0;
+    if (base>0) {
+      const pct=(val-base)/Math.abs(base)*100;
+      if (pct<-15) semaforo='<span class="semaforo rojo"></span>';
+      else if (pct<-5) semaforo='<span class="semaforo amarillo"></span>';
+      else semaforo='<span class="semaforo verde"></span>';
+    }
+    const color=kpi.id.includes('ebitda')||kpi.id.includes('margen')?'gold':kpi.id.includes('costo')||kpi.id.includes('deficit')?'red':'teal';
+    const card=document.createElement('div'); card.className='kpi-card';
+    card.innerHTML=`<div class="label">${semaforo}${kpi.label}</div><div class="value ${color}">${f}</div>${fB?`<div style="font-size:.65rem;color:var(--blue)">vs ${fB}</div>`:''}<div class="sub">${kpi.unidades}</div>`;
+    container.appendChild(card);
+  });
+  // Gráfico principal
+  if (chartInst) chartInst.destroy();
+  const canvas=document.getElementById('impactChart');
+  if (!canvas) return;
+  const kpisNum=(industriaActual.kpis||[]).filter(k=>k.formato!=='info');
+  chartInst=new Chart(canvas.getContext('2d'),{
+    type:'bar',data:{labels:kpisNum.map(k=>k.label),datasets:[{data:kpisNum.map(k=>estadoActual[k.id]||0),backgroundColor:kpisNum.map(k=>k.id.includes('ebitda')||k.id.includes('margen')?'#06d6a0':'#3498db'),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#8fa3b8'}},x:{ticks:{color:'#8fa3b8',font:{size:10}}}}}
+  });
+}
+
+function renderBoardroom() {
+  const container=document.getElementById('boardroomContent');
+  if (!industriaActual||!estadoActual) return;
+  const anclado=estadoAnclado||{};
+  let html='<h3 style="color:var(--gold);margin-bottom:.6rem">📈 Cascada de Impacto</h3>';
+  (industriaActual.kpis||[]).filter(k=>k.formato!=='info'&&estadoActual[k.id]!==undefined).forEach(kpi=>{
+    const va=estadoActual[kpi.id]||0, vb=anclado[kpi.id]||0, d=va-vb;
+    const ds=d>=0?'+'+d.toFixed(2):d.toFixed(2), w=Math.min(200,Math.abs(d)/(Math.abs(vb)||1)*200);
+    html+=`<div class="cascade-row"><span style="width:110px">${kpi.label}</span><span class="cascade-bar ${d>=0?'pos':'neg'}" style="width:${Math.max(20,w)}px"></span><span style="font-weight:700;color:${d>=0?'var(--teal)':'var(--red)'}">${ds} ${kpi.unidades}</span></div>`;
+  });
+  container.innerHTML=html;
+}
+
+function renderCadenas() {
+  const container=document.getElementById('cadenasContent');
+  if (!industriaActual) return;
+  let html='<h3 style="color:var(--gold);margin-bottom:.6rem">⛓️ Cadenas Causales</h3>';
+  (industriaActual.cadenas||[]).forEach(c=>{
+    const color=c.polaridad==='positivo'?'var(--teal)':'var(--red)';
+    html+=`<div class="chain-card ${c.polaridad==='negativo'?'neg':''}"><div class="chain-title" style="color:${color}">${c.nombre}</div><div class="chain-desc">${c.descripcion}</div><div class="chain-impact" style="color:${color}">${c.impacto}</div></div>`;
+  });
+  container.innerHTML=html||'<p style="color:var(--muted)">Sin cadenas definidas.</p>';
+}
+
+function renderGrafo() {
+  const container=document.getElementById('grafoContainer');
+  if (!industriaActual||!industriaActual.nodos){container.innerHTML='';return;}
+  const nodos=industriaActual.nodos;
+  const arcos=industriaActual.arcos||[];
+  const colX={driver:80,intermedio:350,resultado:620};
+  let svg=`<svg viewBox="0 0 800 400"><defs><marker id="arrowPos" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#06d6a0"/></marker><marker id="arrowNeg" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#ee5a6f"/></marker></defs>`;
+  const pos={};
+  ['driver','intermedio','resultado'].forEach(tipo=>{
+    const arr=nodos.filter(n=>n.tipo===tipo);
+    arr.forEach((n,i)=>{
+      const y=60+i*65, x=colX[tipo];
+      pos[n.id]={x:x+60,y:y+20};
+      const color=tipo==='driver'?'#3498db':tipo==='intermedio'?'#f39c12':'#f1c40f';
+      svg+=`<rect x="${x}" y="${y}" width="120" height="40" fill="#1a2332" stroke="${color}" stroke-width="2" rx="4"/><text x="${x+60}" y="${y+18}" font-size="9" fill="#e0e8f0" font-weight="600" text-anchor="middle">${n.label}</text><text x="${x+60}" y="${y+32}" font-size="7" fill="#8fa3b8" text-anchor="middle">${n.unidades}</text>`;
+    });
+  });
+  arcos.forEach(a=>{
+    const o=pos[a.origen], d=pos[a.destino];
+    if (!o||!d) return;
+    const marker=a.polaridad==='positivo'?'url(#arrowPos)':'url(#arrowNeg)';
+    const color=a.polaridad==='positivo'?'#06d6a0':'#ee5a6f';
+    const mx=(o.x+d.x)/2;
+    svg+=`<path d="M${o.x},${o.y} C${mx},${o.y} ${mx},${d.y} ${d.x},${d.y}" stroke="${color}" stroke-width="2" fill="none" marker-end="${marker}" opacity="0.7"/>`;
+  });
+  svg+=`</svg>`;
+  container.innerHTML=svg;
+}
+
+function renderSupuestos() {
+  const table=document.getElementById('supuestosTable');
+  if (!industriaActual||!industriaActual.supuestos){table.innerHTML='';return;}
+  const sup={...(industriaActual.supuestos||{}),...perfilCliente};
+  let html='<thead><tr><th>Parámetro</th><th>Valor</th></tr></thead><tbody>';
+  Object.entries(sup).forEach(([k,v])=>html+=`<tr><td>${k}</td><td><input id="sup-${k}" value="${v}" type="number" step="any"></td></tr>`);
+  html+='</tbody>';
+  table.innerHTML=html;
+}
+
+function aplicarSupuestos() {
+  if (!industriaActual) return;
+  Object.keys(industriaActual.supuestos||{}).forEach(k=>{
+    const input=document.getElementById('sup-'+k);
+    if (input) perfilCliente[k]=parseFloat(input.value);
+  });
+  actualizar();
+}
+
+function resetSupuestos() { perfilCliente={}; actualizar(); renderSupuestos(); }
+
+function runMontecarlo() {
+  if (!industriaActual) return alert('Cargue una industria');
+  const inc=industriaActual.incertidumbre||{};
+  const drivers=(industriaActual.nodos||[]).filter(n=>n.tipo==='driver');
+  const resultados=[];
+  for (let i=0;i<300;i++) {
+    const pal={};
+    drivers.forEach(n=>{
+      const base=parseFloat(document.getElementById('sl-'+n.id)?.value)||industriaActual.initState[n.id]||0;
+      const r=inc[n.id]||{}; const min=r.min!==undefined?r.min:base*0.6, max=r.max!==undefined?r.max:base*1.4;
+      pal[n.id]=min+Math.random()*(max-min);
+    });
+    const res=simular(pal);
+    const kr=(industriaActual.kpis||[]).filter(k=>k.id.includes('ebitda')||k.id.includes('margen')||k.id.includes('deficit'));
+    if (kr.length) resultados.push(res[kr[0].id]||0);
+  }
+  if (!resultados.length) return;
+  const bins={};resultados.forEach(v=>{const k=Math.round(v);bins[k]=(bins[k]||0)+1;});
+  const labels=Object.keys(bins).sort((a,b)=>a-b),data=labels.map(l=>bins[l]);
+  if (chartInst) chartInst.destroy();
+  const canvas=document.getElementById('impactChart');
+  chartInst=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels,datasets:[{data,backgroundColor:'#06d6a0',borderRadius:2}]},
+    options:{responsive:true,plugins:{title:{display:true,text:'Montecarlo (300 sim)',color:'#e0e8f0'},legend:{display:false}}}});
+  const suma=resultados.reduce((a,b)=>a+b,0),media=suma/resultados.length;
+  const sorted=[...resultados].sort((a,b)=>a-b);
+  const d=document.createElement('div');d.className='alert-banner ok';
+  d.innerHTML=`📊 Media=${media.toFixed(2)} | P5=${sorted[Math.floor(300*.05)].toFixed(2)} | P95=${sorted[Math.floor(300*.95)].toFixed(2)}`;
+  const kc=document.getElementById('kpiContainer');kc.insertBefore(d,kc.firstChild);
+}
+
+function anchorBaseline() { estadoAnclado={...estadoActual}; renderBoardroom(); const btn=document.getElementById('anchorBtn'); btn.textContent='📌✓'; setTimeout(()=>btn.textContent='📌 Anclar',1500); }
+
+function actualizarProyeccion() {
+  if (!industriaActual) return;
+  const meses=parseInt(document.getElementById('mesesProy').value)||12;
+  const palBase=leerPalancas();
+  const supBase={...(industriaActual.supuestos||{}),...perfilCliente};
+  const formula=obtenerFormula(industriaActual);
+  const proy=[];
+  for (let m=0;m<=meses;m++) {
+    const pal={};
+    Object.entries(palBase).forEach(([k,v])=>{
+      const nodo=(industriaActual.nodos||[]).find(n=>n.id===k);
+      const elast=nodo?nodo.elasticidad:0;
+      pal[k]=v*(1+elast*0.005*m);
+    });
+    try { proy.push(formula(pal,supBase,CTX)); } catch(e) { proy.push({}); }
+  }
+  const kpiPrincipal=(industriaActual.kpis||[]).find(k=>k.id.includes('ebitda')||k.id.includes('margen')||k.id.includes('deficit'));
+  if (!kpiPrincipal) return;
+  const labels=Array.from({length:meses+1},(_,i)=>'M'+(i+1));
+  const data=proy.map(p=>p[kpiPrincipal.id]||0);
+  const canvas=document.getElementById('proyeccionChart');
+  if (!canvas) return;
+  if (proyeccionChart) proyeccionChart.destroy();
+  proyeccionChart=new Chart(canvas.getContext('2d'),{type:'line',data:{labels,datasets:[{label:kpiPrincipal.label+' proyectado',data,borderColor:'#f1c40f',backgroundColor:'rgba(241,196,15,.08)',fill:true,tension:.3,pointRadius:2}]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{title:{display:true,text:`Proyección a ${meses} meses`,color:'#e0e8f0'}},scales:{y:{ticks:{color:'#8fa3b8'}},x:{ticks:{color:'#8fa3b8'}}}}});
+}
+
+function calibrarDesdeCSV() {
+  const file=document.getElementById('csvCalibrar').files[0];
+  if (!file) return alert('Seleccione un CSV');
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const lines=e.target.result.trim().split(/\r?\n/);
+    if (lines.length<2) return alert('CSV muy corto');
+    const headers=lines[0].split(',').map(h=>h.trim().toLowerCase());
+    const rows=lines.slice(1).map(line=>{const vals=line.split(',');const o={};headers.forEach((h,i)=>o[h]=parseFloat(vals[i]));return o;}).filter(r=>!isNaN(Object.values(r)[0]));
+    if (rows.length<3) return alert('Se necesitan al menos 3 filas');
+    const drivers=(industriaActual.nodos||[]).filter(n=>n.tipo==='driver');
+    const kpiRes=(industriaActual.kpis||[]).find(k=>k.id.includes('ebitda')||k.id.includes('margen')||k.id.includes('deficit'));
+    if (!kpiRes) return alert('No se encontró KPI resultado');
+    let res='📊 Calibración:\n\n';
+    drivers.forEach(driver=>{
+      const x=rows.map(r=>r[driver.id]).filter(v=>!isNaN(v));
+      const y=rows.map(r=>r[kpiRes.id]).filter(v=>!isNaN(v));
+      if (x.length<3||y.length<3) return;
+      const n=Math.min(x.length,y.length);
+      let sx=0,sy=0,sxy=0,sx2=0;
+      for(let i=0;i<n;i++){sx+=x[i];sy+=y[i];sxy+=x[i]*y[i];sx2+=x[i]*x[i];}
+      const pend=(n*sxy-sx*sy)/(n*sx2-sx*sx);
+      const mx=sx/n,my=sy/n;
+      const elastReal=mx>0&&my>0?(pend*mx/my):0;
+      const elastAct=driver.elasticidad||0;
+      const diff=elastReal-elastAct;
+      res+=`${Math.abs(diff)>.3?'⚠️':'✅'} ${driver.label}: act. ${elastAct.toFixed(2)} → sug. ${elastReal.toFixed(2)} (Δ ${diff.toFixed(2)})\n`;
+    });
+    res+='\n💡 Aplique en Supuestos o JSON.';
+    document.getElementById('calResult').textContent=res;
+  };
+  reader.readAsText(file);
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  const map={kpis:'tab-kpis',boardroom:'tab-boardroom',cadenas:'tab-cadenas',grafo:'tab-grafo',supuestos:'tab-supuestos',proyeccion:'tab-proyeccion',calibracion:'tab-calibracion'};
+  document.getElementById(map[tab]).classList.add('active');
+  const tabs=document.querySelectorAll('.tab');
+  const idx=Object.keys(map).indexOf(tab);
+  if (idx>=0&&tabs[idx]) tabs[idx].classList.add('active');
+  if (tab==='boardroom') renderBoardroom();
+  if (tab==='cadenas') renderCadenas();
+  if (tab==='grafo') renderGrafo();
+  if (tab==='supuestos') renderSupuestos();
+  if (tab==='proyeccion') actualizarProyeccion();
+}
+
+// ═══════════════════════════════════════════
+// 7. MODAL ESCENARIOS
+// ═══════════════════════════════════════════
+function abrirModalGuardar(){document.getElementById('modalGuardar').classList.add('active');renderizarEscenariosGuardados();}
+function cerrarModalGuardar(){document.getElementById('modalGuardar').classList.remove('active');}
+function guardarEscenario(){
+  const nombre=document.getElementById('nombreEscenario').value.trim();
+  if (!nombre) return alert('Ingrese un nombre');
+  const clave='esc_'+nombre.replace(/\s+/g,'_');
+  const data={nombre,industria:document.getElementById('industrySelect').value,empresa:document.getElementById('companySelect').value,empresaB:document.getElementById('companySelectB')?.value||'',palancas:leerPalancas(),fecha:new Date().toISOString()};
+  localStorage.setItem(clave,JSON.stringify(data));
+  document.getElementById('nombreEscenario').value='';
+  renderizarEscenariosGuardados();
+  alert('✅ Escenario guardado: '+nombre);
+}
+function renderizarEscenariosGuardados(){
+  const container=document.getElementById('listaEscenarios');
+  container.innerHTML='';
+  const keys=Object.keys(localStorage).filter(k=>k.startsWith('esc_'));
+  if (keys.length===0) return container.innerHTML='<p style="color:var(--muted);font-size:.7rem">Sin escenarios.</p>';
+  keys.forEach(key=>{
+    const data=JSON.parse(localStorage.getItem(key));
+    const div=document.createElement('div');div.className='saved-scenario';
+    div.innerHTML=`<span>${data.nombre} <small style="color:var(--muted)">(${data.industria})</small></span>`;
+    const btnC=document.createElement('button');btnC.textContent='Cargar';btnC.style.cssText='background:var(--teal);border:none;color:#000;padding:.15rem .5rem;border-radius:4px;cursor:pointer;font-size:.65rem;margin:0 .2rem';
+    btnC.onclick=()=>{cargarEscenario(data);cerrarModalGuardar();};div.appendChild(btnC);
+    const btnD=document.createElement('button');btnD.textContent='🗑';btnD.style.cssText='background:transparent;border:1px solid var(--red);color:var(--red);padding:.15rem .4rem;border-radius:4px;cursor:pointer;font-size:.65rem';
+    btnD.onclick=()=>{if (confirm('¿Eliminar?')){localStorage.removeItem(key);renderizarEscenariosGuardados();}};div.appendChild(btnD);
+    container.appendChild(div);
+  });
+}
+function cargarEscenario(data){
+  if (data.industria&&data.industria!==document.getElementById('industrySelect').value){document.getElementById('industrySelect').value=data.industria;poblarEmpresas();}
+  if (data.empresa){document.getElementById('companySelect').value=data.empresa;cargarEmpresa(data.empresa);}
+  if (data.empresaB){document.getElementById('companySelectB').value=data.empresaB;cargarEmpresaB(data.empresaB);}
+  setTimeout(()=>{
+    Object.entries(data.palancas).forEach(([id,val])=>{
+      const sl=document.getElementById('sl-'+id),vl=document.getElementById('val-'+id);
+      if(sl){sl.value=val;if(vl)vl.textContent=Number(val).toFixed(2);}
+    });
+    actualizar();
+  },300);
+}
+
+// ═══════════════════════════════════════════
+// 8. COMPARTIR URL
+// ═══════════════════════════════════════════
+function compartirURL(){
+  const pal=leerPalancas();
+  const params=new URLSearchParams();
+  params.set('ind',document.getElementById('industrySelect').value);
+  params.set('emp',document.getElementById('companySelect').value);
+  if (document.getElementById('companySelectB')?.value) params.set('empB',document.getElementById('companySelectB').value);
+  Object.entries(pal).forEach(([k,v])=>params.set(k,v.toFixed(2)));
+  const url=window.location.origin+window.location.pathname+'?'+params.toString();
+  if (navigator.clipboard){navigator.clipboard.writeText(url).then(()=>alert('🔗 Enlace copiado'));}
+  else{prompt('Copie:',url);}
+}
+function cargarDesdeURL(){
+  const params=new URLSearchParams(window.location.search);
+  if (params.toString().length===0) return;
+  const ind=params.get('ind'),emp=params.get('emp'),empB=params.get('empB');
+  if (ind){document.getElementById('industrySelect').value=ind;poblarEmpresas();}
+  if (emp) setTimeout(()=>{document.getElementById('companySelect').value=emp;cargarEmpresa(emp);},200);
+  if (empB) setTimeout(()=>{document.getElementById('companySelectB').value=empB;cargarEmpresaB(empB);},300);
+  setTimeout(()=>{
+    params.forEach((val,key)=>{
+      if (['ind','emp','empB'].includes(key)) return;
+      const sl=document.getElementById('sl-'+key),vl=document.getElementById('val-'+key);
+      if(sl){sl.value=parseFloat(val);if(vl)vl.textContent=Number(val).toFixed(2);}
+    });
+    actualizar();
+  },500);
+}
+
+// ═══════════════════════════════════════════
+// 9. CONTEXTO AUTO
+// ═══════════════════════════════════════════
+function actualizarContextoAuto(){
+  const btn=document.getElementById('btnContextoAuto');btn.textContent='⏳';btn.disabled=true;
+  fetch('https://mindicador.cl/api').then(r=>r.json()).then(data=>{
+    if (data.dolar) CTX.dolar_clp=Math.round(data.dolar.valor);
+    if (data.uf) CTX.uf_clp=Math.round(data.uf.valor);
+    if (data.ipc) CTX.ipc_anual=data.ipc.valor;
+    if (data.tpm) CTX.tasa_interes=data.tpm.valor;
+    CTX.fecha_actualizacion=new Date().toISOString().slice(0,10);
+    alert('✅ Actualizado: Dólar $'+CTX.dolar_clp+' | UF $'+CTX.uf_clp+' | IPC '+CTX.ipc_anual+'%');
+    actualizar();
+  }).catch(()=>alert('❌ Error al actualizar')).finally(()=>{btn.textContent='🌐 Actualizar';btn.disabled=false;});
+}
+
+// ═══════════════════════════════════════════
+// 10. PDF NARRATIVO
+// ═══════════════════════════════════════════
+function exportarPDFNarrativo(){
+  if (!industriaActual||!estadoActual) return;
+  const { jsPDF }=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  let y=20;
+  const empresa=document.getElementById('empresaBadge')?.textContent||'Sin empresa';
+  doc.setFont('helvetica','bold');doc.setFontSize(22);doc.setTextColor(6,214,160);doc.text('PRISMA · Informe Ejecutivo',20,y);y+=10;
+  doc.setFontSize(14);doc.setTextColor(100);doc.text(industriaActual.nombre,20,y);y+=8;
+  doc.setFontSize(11);doc.text('Empresa: '+empresa,20,y);y+=6;
+  doc.setFontSize(9);doc.text('Generado: '+new Date().toLocaleString('es-CL'),20,y);y+=15;
+  doc.setFontSize(14);doc.setTextColor(30,30,30);doc.text('Principales indicadores',20,y);y+=8;
+  doc.setFontSize(10);
+  (industriaActual.kpis||[]).slice(0,6).forEach(kpi=>{
+    const val=estadoActual[kpi.id]!==undefined?estadoActual[kpi.id]:0;
+    let f=Number(val).toFixed(2);if (kpi.formato==='dinero') f='$'+Number(val).toFixed(1)+'M';else if (kpi.formato==='porcentaje') f=Number(val).toFixed(1)+'%';
+    doc.text(`${kpi.label}: ${f} ${kpi.unidades}`,25,y);y+=5;
+  });
+  y+=5;
+  const cadena=(industriaActual.cadenas||[])[0];
+  if (cadena) {
+    doc.setFontSize(12);doc.setTextColor(200,50,50);doc.text('Análisis causal principal',20,y);y+=7;
+    doc.setFontSize(10);doc.setTextColor(60,60,60);
+    doc.text(`Cadena: ${cadena.nombre}`,25,y);y+=5;doc.text(`Descripción: ${cadena.descripcion}`,25,y);y+=5;doc.text(`Impacto: ${cadena.impacto}`,25,y);y+=8;
+  }
+  const kpisNum=(industriaActual.kpis||[]).filter(k=>k.formato!=='info');
+  let maxDelta=0,kpiMax='';
+  kpisNum.forEach(kpi=>{const val=estadoActual[kpi.id]||0,base=kpi.base||0,d=base>0?Math.abs((val-base)/base*100):0;if(d>maxDelta){maxDelta=d;kpiMax=kpi.label;}});
+  doc.setFontSize(12);doc.setTextColor(30,30,30);doc.text('Conclusión automática',20,y);y+=7;
+  doc.setFontSize(10);doc.text(`La mayor desviación se observa en "${kpiMax}" (${maxDelta.toFixed(1)}% vs base).`,25,y);y+=5;
+  doc.text('Se recomienda revisar las palancas asociadas y el escenario de estrés correspondiente.',25,y);
+  doc.save('informe_prisma.pdf');
+}
+
+// ═══════════════════════════════════════════
+// 11. MODO PRESENTACIÓN
+// ═══════════════════════════════════════════
+function togglePresentation(){
+  modoPresentacion=!modoPresentacion;
+  document.body.classList.toggle('presentation',modoPresentacion);
+  const btn=document.getElementById('presentationBtn');
+  btn.textContent=modoPresentacion?'🎥 Salir':'🎥 Presentar';
+  btn.style.background=modoPresentacion?'var(--gold)':'';
+  btn.style.color=modoPresentacion?'#000':'';
+}
+
+// ═══════════════════════════════════════════
+// 12. EVENTOS
+// ═══════════════════════════════════════════
+document.getElementById('industrySelect').addEventListener('change',poblarEmpresas);
+document.getElementById('companySelect').addEventListener('change',function(){cargarEmpresa(this.value);});
+document.getElementById('uploadIndustry').addEventListener('change',function(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{try{const json=JSON.parse(ev.target.result);if(typeof json.formulaPrincipal==='string')json.formulaPrincipal=eval('('+json.formulaPrincipal+')');industriaActual=json;perfilCliente={};construirSidebar();actualizar();}catch(ex){alert('JSON inválido');}};
+  reader.readAsText(file);
+});
+document.getElementById('uploadProfile').addEventListener('change',function(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{try{perfilCliente=JSON.parse(ev.target.result);actualizar();}catch(ex){alert('JSON inválido');}};
+  reader.readAsText(file);
+});
+document.getElementById('btnContexto').addEventListener('click',()=>document.getElementById('uploadContexto').click());
+document.getElementById('uploadContexto').addEventListener('change',function(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{try{CTX={...DEFAULT_CTX,...JSON.parse(ev.target.result)};actualizar();}catch(ex){alert('JSON inválido');}};
+  reader.readAsText(file);
+});
+
+// ═══════════════════════════════════════════
+// 13. INICIO
+// ═══════════════════════════════════════════
+window.addEventListener('load',()=>{
+  poblarEmpresas();
+  if (window.location.search.length>0) cargarDesdeURL();
+});
+</script>
+</body>
+</html>
