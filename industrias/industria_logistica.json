@@ -1,0 +1,78 @@
+{
+  "nombre": "Logística y Transporte (Profundizado)",
+  "supuestos": {
+    "flotaPropia": 80,
+    "flotaSubcontratada": 40,
+    "kmPorDiaBase": 1800,
+    "diasOp": 312,
+    "costoFijoPorCamion": 18_000_000
+  },
+  "elasticidades": {
+    "ocupacionFlota": 0.9,
+    "tarifaFlete": 1.1,
+    "precioCombustible": -0.7,
+    "tasaAtrasos": -0.5,
+    "tasaSiniestralidad": -0.4,
+    "costoNeumaticos": -0.35,
+    "congestionRuta": -0.45,
+    "precioPeaje": -0.3,
+    "ocupacionBodega": 0.5
+  },
+  "incertidumbre": {
+    "ocupacionFlota": { "min": 65, "max": 98 },
+    "tarifaFlete": { "min": 2.0, "max": 4.5 },
+    "precioCombustible": { "min": 800, "max": 1600 },
+    "tasaAtrasos": { "min": 3, "max": 20 },
+    "tasaSiniestralidad": { "min": 1, "max": 8 },
+    "costoNeumaticos": { "min": 0.10, "max": 0.30 },
+    "congestionRuta": { "min": 5, "max": 35 },
+    "precioPeaje": { "min": 0.06, "max": 0.20 },
+    "ocupacionBodega": { "min": 60, "max": 95 }
+  },
+  "nodos": [
+    {"id":"ocupacionFlota","label":"Ocupación Flota (%)","tipo":"driver","unidades":"%","elasticidad":0.9},
+    {"id":"tarifaFlete","label":"Tarifa Flete (CLP/km)","tipo":"driver","unidades":"CLP/km","elasticidad":1.1},
+    {"id":"precioCombustible","label":"Precio Combustible (CLP/L)","tipo":"driver","unidades":"CLP/L","elasticidad":-0.7},
+    {"id":"tasaAtrasos","label":"Tasa de Atrasos (%)","tipo":"driver","unidades":"%","elasticidad":-0.5},
+    {"id":"tasaSiniestralidad","label":"Siniestralidad (%)","tipo":"driver","unidades":"%","elasticidad":-0.4},
+    {"id":"costoNeumaticos","label":"Costo Neumáticos (CLP/km)","tipo":"driver","unidades":"CLP/km","elasticidad":-0.35},
+    {"id":"congestionRuta","label":"Congestión en Ruta (%)","tipo":"driver","unidades":"%","elasticidad":-0.45},
+    {"id":"precioPeaje","label":"Precio Peaje (CLP/km)","tipo":"driver","unidades":"CLP/km","elasticidad":-0.3},
+    {"id":"ocupacionBodega","label":"Ocupación Bodega (%)","tipo":"driver","unidades":"%","elasticidad":0.5},
+    {"id":"ebitda","label":"EBITDA (M CLP)","tipo":"resultado","unidades":"M CLP","elasticidad":0},
+    {"id":"slaCumplimiento","label":"SLA Cumplimiento","tipo":"intermedio","unidades":"%","elasticidad":0},
+    {"id":"costoPorKm","label":"Costo por km (CLP)","tipo":"intermedio","unidades":"CLP","elasticidad":0}
+  ],
+  "arcos": [
+    {"origen":"ocupacionFlota","destino":"ebitda","polaridad":"positivo"},
+    {"origen":"tarifaFlete","destino":"ebitda","polaridad":"positivo"},
+    {"origen":"precioCombustible","destino":"costoPorKm","polaridad":"positivo"},
+    {"origen":"costoNeumaticos","destino":"costoPorKm","polaridad":"positivo"},
+    {"origen":"precioPeaje","destino":"costoPorKm","polaridad":"positivo"},
+    {"origen":"congestionRuta","destino":"tasaAtrasos","polaridad":"positivo"},
+    {"origen":"tasaAtrasos","destino":"slaCumplimiento","polaridad":"negativo"},
+    {"origen":"tasaSiniestralidad","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"ocupacionBodega","destino":"slaCumplimiento","polaridad":"positivo"},
+    {"origen":"costoPorKm","destino":"ebitda","polaridad":"negativo"}
+  ],
+  "kpis": [
+    {"id":"ocupacionFlota","label":"Ocup. Flota","base":85,"unidades":"%","formato":"num"},
+    {"id":"tarifaFlete","label":"Tarifa","base":2.8,"unidades":"CLP/km","formato":"num"},
+    {"id":"precioCombustible","label":"Combustible","base":1050,"unidades":"CLP/L","formato":"num"},
+    {"id":"ebitda","label":"EBITDA","base":0,"unidades":"M CLP","formato":"dinero"},
+    {"id":"slaCumplimiento","label":"SLA","base":96,"unidades":"%","formato":"num"},
+    {"id":"costoPorKm","label":"Costo/km","base":1.8,"unidades":"CLP","formato":"num"}
+  ],
+  "cadenas": [
+    {"nombre":"Alza combustible y neumáticos","descripcion":"Costo/km ↑ → margen ↓ → EBITDA ↓","impacto":"Negativo","polaridad":"negativo"},
+    {"nombre":"Congestión crónica","descripcion":"Retrasos en ruta → SLA ↓ → multas contractuales","impacto":"Riesgo contractual","polaridad":"negativo"},
+    {"nombre":"Mejora ocupación de bodegas","descripcion":"Más rotación → mejor SLA → retención clientes","impacto":"Positivo","polaridad":"positivo"}
+  ],
+  "escenarios": [
+    {"nombre":"Base","palancas":{"ocupacionFlota":85,"tarifaFlete":2.8,"precioCombustible":1050,"tasaAtrasos":8,"tasaSiniestralidad":2.5,"costoNeumaticos":0.18,"congestionRuta":15,"precioPeaje":0.12,"ocupacionBodega":78}},
+    {"nombre":"Crisis Combustible","palancas":{"ocupacionFlota":80,"tarifaFlete":2.6,"precioCombustible":1400,"tasaAtrasos":12,"tasaSiniestralidad":4,"costoNeumaticos":0.22,"congestionRuta":25,"precioPeaje":0.15,"ocupacionBodega":72}},
+    {"nombre":"Alta Demanda","palancas":{"ocupacionFlota":95,"tarifaFlete":3.2,"precioCombustible":1000,"tasaAtrasos":5,"tasaSiniestralidad":2,"costoNeumaticos":0.16,"congestionRuta":10,"precioPeaje":0.10,"ocupacionBodega":88}}
+  ],
+  "initState": {"ocupacionFlota":85,"tarifaFlete":2.8,"precioCombustible":1050,"tasaAtrasos":8,"tasaSiniestralidad":2.5,"costoNeumaticos":0.18,"congestionRuta":15,"precioPeaje":0.12,"ocupacionBodega":78},
+  "formulaPrincipal": "function(p,s,ctx){var kmTotal=(s.flotaPropia*p.ocupacionFlota/100+s.flotaSubcontratada*(p.ocupacionFlota-10)/100)*s.kmPorDiaBase*s.diasOp;var ing=kmTotal*p.tarifaFlete;var comb=p.precioCombustible*0.35;var neum=p.costoNeumaticos;var peaje=p.precioPeaje;var mant=0.45;var costoKm=comb+neum+peaje+mant;var costoVar=kmTotal*costoKm;var sini=kmTotal*p.tasaSiniestralidad/100*0.08;var cFijo=(s.flotaPropia+s.flotaSubcontratada)*s.costoFijoPorCamion;var ebitda=(ing-costoVar-cFijo-sini)/1_000_000;var sla=100-p.tasaAtrasos*6-p.congestionRuta*0.2;return{ebitda:+ebitda.toFixed(2),slaCumplimiento:Math.round(sla),costoPorKm:+costoKm.toFixed(0)};}"
+}
