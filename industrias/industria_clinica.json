@@ -1,0 +1,102 @@
+{
+  "nombre": "Clínica Privada (Profundizado)",
+  "supuestos": {
+    "camas": 85,
+    "pabellones": 6,
+    "diasOp": 312,
+    "horasBasePabellon": 8,
+    "costoFijoPorCama": 72_000_000,
+    "costoFijoPabellon": 40_000_000,
+    "factorReadmision": 0.45,
+    "indiceCaseMix": 1.15,
+    "costoPersonalBase": 22_000_000,
+    "ingresoPorPabellonUnit": 85_000,
+    "factorMultaGES": 12_000_000
+  },
+  "elasticidades": {
+    "ocupacion": 1.20,
+    "estancia": -0.75,
+    "readmision": -0.62,
+    "tarifaBase": 1.05,
+    "proporcionISAPRE": 1.10,
+    "costoInsumos": -0.40,
+    "inflacion": -0.88,
+    "horasExtra": -0.50,
+    "usoPabellones": 0.70,
+    "inversionEquipamiento": 0.60,
+    "productividadMedico": 0.45
+  },
+  "incertidumbre": {
+    "ocupacion": { "min": 65, "max": 98 },
+    "estancia": { "min": 2.5, "max": 7.0 },
+    "readmision": { "min": 1.5, "max": 8.0 },
+    "tarifaBase": { "min": 220, "max": 450 },
+    "proporcionISAPRE": { "min": 25, "max": 70 },
+    "costoInsumos": { "min": 120, "max": 300 },
+    "inflacion": { "min": 2.0, "max": 12.0 },
+    "horasExtra": { "min": 0, "max": 30 },
+    "usoPabellones": { "min": 60, "max": 95 },
+    "inversionEquipamiento": { "min": 10, "max": 80 },
+    "productividadMedico": { "min": 12, "max": 24 }
+  },
+  "nodos": [
+    {"id":"ocupacion","label":"Ocupación Camas (%)","tipo":"driver","unidades":"%","elasticidad":1.20},
+    {"id":"estancia","label":"Estancia Media (días)","tipo":"driver","unidades":"días","elasticidad":-0.75},
+    {"id":"readmision","label":"Readmisión (%)","tipo":"driver","unidades":"%","elasticidad":-0.62},
+    {"id":"tarifaBase","label":"Tarifa Base Día-Cama ($k)","tipo":"driver","unidades":"$k","elasticidad":1.05},
+    {"id":"proporcionISAPRE","label":"Proporción ISAPRE (%)","tipo":"driver","unidades":"%","elasticidad":1.10},
+    {"id":"costoInsumos","label":"Costo Insumos/Pac ($k)","tipo":"driver","unidades":"$k","elasticidad":-0.40},
+    {"id":"inflacion","label":"Inflación Sectorial (%)","tipo":"driver","unidades":"%","elasticidad":-0.88},
+    {"id":"horasExtra","label":"Horas Extra (% sobre base)","tipo":"driver","unidades":"%","elasticidad":-0.50},
+    {"id":"usoPabellones","label":"Uso de Pabellones (%)","tipo":"driver","unidades":"%","elasticidad":0.70},
+    {"id":"inversionEquipamiento","label":"Inv. Equipamiento (M CLP)","tipo":"driver","unidades":"M CLP","elasticidad":0.60},
+    {"id":"productividadMedico","label":"Productividad Médico (cons/día)","tipo":"driver","unidades":"cons/día","elasticidad":0.45},
+    {"id":"volumen","label":"Vol. Pacientes/año","tipo":"intermedio","unidades":"pac.","elasticidad":0},
+    {"id":"margen","label":"Margen Oper. (M CLP)","tipo":"resultado","unidades":"M CLP","elasticidad":0},
+    {"id":"calidadIndice","label":"Índice de Calidad","tipo":"intermedio","unidades":"/100","elasticidad":0},
+    {"id":"cumplimientoGES","label":"Cumpl. GES (%)","tipo":"intermedio","unidades":"%","elasticidad":0},
+    {"id":"gastoPersonalPct","label":"Gasto Personal/Ingreso (%)","tipo":"intermedio","unidades":"%","elasticidad":0},
+    {"id":"productividad","label":"Productividad (pac/día/cama)","tipo":"intermedio","unidades":"pac/día/cama","elasticidad":0}
+  ],
+  "arcos": [
+    {"origen":"ocupacion","destino":"volumen","polaridad":"positivo"},
+    {"origen":"estancia","destino":"volumen","polaridad":"negativo"},
+    {"origen":"readmision","destino":"calidadIndice","polaridad":"negativo"},
+    {"origen":"readmision","destino":"margen","polaridad":"negativo"},
+    {"origen":"tarifaBase","destino":"margen","polaridad":"positivo"},
+    {"origen":"proporcionISAPRE","destino":"margen","polaridad":"positivo"},
+    {"origen":"costoInsumos","destino":"margen","polaridad":"negativo"},
+    {"origen":"inflacion","destino":"margen","polaridad":"negativo"},
+    {"origen":"horasExtra","destino":"margen","polaridad":"negativo"},
+    {"origen":"horasExtra","destino":"calidadIndice","polaridad":"negativo"},
+    {"origen":"usoPabellones","destino":"margen","polaridad":"positivo"},
+    {"origen":"inversionEquipamiento","destino":"usoPabellones","polaridad":"positivo"},
+    {"origen":"inversionEquipamiento","destino":"calidadIndice","polaridad":"positivo"},
+    {"origen":"productividadMedico","destino":"volumen","polaridad":"positivo"},
+    {"origen":"productividadMedico","destino":"gastoPersonalPct","polaridad":"negativo"}
+  ],
+  "kpis": [
+    {"id":"ocupacion","label":"Ocupación","base":82,"unidades":"%","formato":"num"},
+    {"id":"estancia","label":"Estancia Media","base":3.8,"unidades":"días","formato":"num"},
+    {"id":"readmision","label":"Readmisión","base":3.2,"unidades":"%","formato":"num"},
+    {"id":"volumen","label":"Vol. Pacientes","base":0,"unidades":"pac.","formato":"num"},
+    {"id":"margen","label":"Margen Oper.","base":0,"unidades":"M CLP","formato":"dinero"},
+    {"id":"calidadIndice","label":"Calidad","base":72,"unidades":"/100","formato":"num"},
+    {"id":"cumplimientoGES","label":"Cumpl. GES","base":94,"unidades":"%","formato":"num"},
+    {"id":"gastoPersonalPct","label":"Gasto Personal/Ingreso","base":48,"unidades":"%","formato":"num"},
+    {"id":"productividad","label":"Productividad","base":0,"unidades":"pac/día/cama","formato":"num"}
+  ],
+  "cadenas": [
+    {"nombre":"Presión de personal","descripcion":"Horas extra elevadas → fatiga → menor calidad + mayor costo → margen comprimido","impacto":"Doble impacto","polaridad":"negativo"},
+    {"nombre":"Cambio en mix de pagadores","descripcion":"Más ISAPRE → mejor tarifa → margen mejora sin necesidad de más volumen","impacto":"Positivo","polaridad":"positivo"},
+    {"nombre":"Inversión en equipamiento","descripcion":"Nuevos equipos → más capacidad quirúrgica → más ingresos por pabellón → mejor calidad","impacto":"Rentable con demanda","polaridad":"positivo"},
+    {"nombre":"Alta ocupación sostenida","descripcion":"Ocupación >92% → congestión → readmisiones ↑ → calidad ↓","impacto":"Riesgo operacional","polaridad":"negativo"}
+  ],
+  "escenarios": [
+    {"nombre":"Base","palancas":{"ocupacion":82,"estancia":3.8,"readmision":3.2,"tarifaBase":310,"proporcionISAPRE":45,"costoInsumos":185,"inflacion":4.2,"horasExtra":12,"usoPabellones":78,"inversionEquipamiento":45,"productividadMedico":18}},
+    {"nombre":"Presión Sindical","palancas":{"ocupacion":84,"estancia":4.0,"readmision":3.5,"tarifaBase":310,"proporcionISAPRE":42,"costoInsumos":195,"inflacion":5.0,"horasExtra":22,"usoPabellones":75,"inversionEquipamiento":30,"productividadMedico":16}},
+    {"nombre":"Expansión ISAPRE","palancas":{"ocupacion":86,"estancia":3.5,"readmision":2.8,"tarifaBase":340,"proporcionISAPRE":60,"costoInsumos":175,"inflacion":3.8,"horasExtra":8,"usoPabellones":85,"inversionEquipamiento":55,"productividadMedico":20}}
+  ],
+  "initState": {"ocupacion":82,"estancia":3.8,"readmision":3.2,"tarifaBase":310,"proporcionISAPRE":45,"costoInsumos":185,"inflacion":4.2,"horasExtra":12,"usoPabellones":78,"inversionEquipamiento":45,"productividadMedico":18},
+  "formulaPrincipal": "function(p,s,ctx){var rot=365/Math.max(p.estancia,0.5);var volBase=s.camas*(p.ocupacion/100)*rot;var cong=p.ocupacion>85?1+(p.ocupacion-85)*0.0025:1;var vol=Math.round(volBase/cong);var tIsapre=1.25,tFonasa=0.85,tPartic=1.60,tConven=0.95;var pIsapre=p.proporcionISAPRE/100,pFonasa=0.35,pPartic=0.15,pConven=0.05;var tarifaMedia=p.tarifaBase*(pIsapre*tIsapre+pFonasa*tFonasa+pPartic*tPartic+pConven*tConven)*1000;var ingBruto=vol*tarifaMedia*p.estancia;var cRead=vol*(p.readmision/100)*tarifaMedia*p.estancia*s.factorReadmision;var ingNeto=ingBruto-cRead;var horaspab=s.pabellones*s.diasOp*s.horasBasePabellon*(p.usoPabellones/100);var ingPab=horaspab*s.ingresoPorPabellonUnit;var ingTotal=ingNeto+ingPab;var cVar=vol*(p.costoInsumos*1000);var cPersonal=s.camas*s.costoPersonalBase*(1+p.horasExtra/100*1.5);var cFijo=s.camas*s.costoFijoPorCama+s.pabellones*s.costoFijoPabellon+p.inversionEquipamiento*1_000_000;var aInf=1+(p.inflacion/100);var cTotal=(cVar+cPersonal+cFijo)*aInf;var multaGES=p.estancia>5?s.factorMultaGES*vol*0.02:0;var margen=(ingTotal-cTotal-multaGES)/1_000_000;var cal=Math.min(100,Math.max(0,65-(p.readmision-3)*8-(p.estancia-3.5)*5+(p.ocupacion<93?10:-5)-(p.horasExtra-10)*0.3+(p.inversionEquipamiento-40)*0.05));var cumplGES=Math.min(100,Math.max(75,95-(p.estancia-3.5)*2-(p.readmision-3)*3+(p.usoPabellones-75)*0.1));var gpPct=Math.round(cPersonal/(ingTotal||1)*100);var prod=Math.round(vol/(s.camas*365)*100)/100;return{volumen:vol,margen:+margen.toFixed(2),calidadIndice:Math.round(cal),cumplimientoGES:Math.round(cumplGES),gastoPersonalPct:gpPct,productividad:+prod.toFixed(2)};}"
+}
