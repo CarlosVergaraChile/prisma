@@ -1,0 +1,89 @@
+{
+  "nombre": "Energía – Generación y Comercialización (Profundizado)",
+  "supuestos": {
+    "capacidadTotalMW": 500,
+    "mixHidro": 0.30,
+    "mixTermico": 0.40,
+    "mixERNC": 0.30,
+    "horasAno": 8760,
+    "precioPPA": 65,
+    "costoMWHidro": 8,
+    "costoMWERNC": 5,
+    "factorEmision": 0.0008
+  },
+  "elasticidades": {
+    "precioSpot": 0.8,
+    "disponibilidadTermico": 0.7,
+    "factorHidrologia": 0.5,
+    "factorPlantaERNC": 0.7,
+    "precioGas": -0.6,
+    "coberturaPPA": 0.9,
+    "tipoCambio": 1.0,
+    "capacidadBaterias": 0.6,
+    "restriccionTransmision": -0.5,
+    "impuestoVerde": -0.35,
+    "precioCarbon": -0.45,
+    "costoMantenimientoMayor": -0.3
+  },
+  "incertidumbre": {
+    "precioSpot": { "min": 35, "max": 150 },
+    "disponibilidadTermico": { "min": 70, "max": 98 },
+    "factorHidrologia": { "min": 25, "max": 100 },
+    "factorPlantaERNC": { "min": 18, "max": 45 },
+    "precioGas": { "min": 4, "max": 10 },
+    "coberturaPPA": { "min": 50, "max": 90 },
+    "tipoCambio": { "min": 800, "max": 1000 },
+    "capacidadBaterias": { "min": 0, "max": 50 },
+    "restriccionTransmision": { "min": 5, "max": 30 },
+    "impuestoVerde": { "min": 2, "max": 15 },
+    "precioCarbon": { "min": 80, "max": 150 },
+    "costoMantenimientoMayor": { "min": 2, "max": 8 }
+  },
+  "nodos": [
+    {"id":"precioSpot","label":"Precio Spot (USD/MWh)","tipo":"driver","unidades":"USD/MWh","elasticidad":0.8},
+    {"id":"disponibilidadTermico","label":"Disp. Térmica (%)","tipo":"driver","unidades":"%","elasticidad":0.7},
+    {"id":"factorHidrologia","label":"Factor Hidrología (%)","tipo":"driver","unidades":"%","elasticidad":0.5},
+    {"id":"factorPlantaERNC","label":"Factor Planta ERNC (%)","tipo":"driver","unidades":"%","elasticidad":0.7},
+    {"id":"precioGas","label":"Precio Gas (USD/MMBtu)","tipo":"driver","unidades":"USD/MMBtu","elasticidad":-0.6},
+    {"id":"precioCarbon","label":"Precio Carbón (USD/ton)","tipo":"driver","unidades":"USD/ton","elasticidad":-0.45},
+    {"id":"coberturaPPA","label":"Cobertura Contratos PPA (%)","tipo":"driver","unidades":"%","elasticidad":0.9},
+    {"id":"tipoCambio","label":"Tipo Cambio (CLP/USD)","tipo":"driver","unidades":"CLP","elasticidad":1.0},
+    {"id":"capacidadBaterias","label":"Capacidad Baterías (MW)","tipo":"driver","unidades":"MW","elasticidad":0.6},
+    {"id":"restriccionTransmision","label":"Restricción Transmisión (%)","tipo":"driver","unidades":"%","elasticidad":-0.5},
+    {"id":"impuestoVerde","label":"Impuesto Verde (USD/ton CO₂)","tipo":"driver","unidades":"USD/ton","elasticidad":-0.35},
+    {"id":"costoMantenimientoMayor","label":"Mant. Mayor (M USD/año)","tipo":"driver","unidades":"M USD/año","elasticidad":-0.3},
+    {"id":"ebitda","label":"EBITDA (M USD)","tipo":"resultado","unidades":"M USD","elasticidad":0},
+    {"id":"vertimientoPct","label":"Vertimiento ERNC (%)","tipo":"intermedio","unidades":"%","elasticidad":0},
+    {"id":"emisionesCO2","label":"Emisiones CO₂ (M ton)","tipo":"intermedio","unidades":"M ton","elasticidad":0}
+  ],
+  "arcos": [
+    {"origen":"precioSpot","destino":"ebitda","polaridad":"positivo"},
+    {"origen":"disponibilidadTermico","destino":"ebitda","polaridad":"positivo"},
+    {"origen":"precioGas","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"precioCarbon","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"coberturaPPA","destino":"ebitda","polaridad":"positivo"},
+    {"origen":"capacidadBaterias","destino":"vertimientoPct","polaridad":"negativo"},
+    {"origen":"restriccionTransmision","destino":"precioSpot","polaridad":"negativo"},
+    {"origen":"impuestoVerde","destino":"ebitda","polaridad":"negativo"},
+    {"origen":"costoMantenimientoMayor","destino":"ebitda","polaridad":"negativo"}
+  ],
+  "kpis": [
+    {"id":"precioSpot","label":"Spot","base":80,"unidades":"USD/MWh","formato":"num"},
+    {"id":"disponibilidadTermico","label":"Disp. Térm.","base":88,"unidades":"%","formato":"num"},
+    {"id":"ebitda","label":"EBITDA","base":0,"unidades":"M USD","formato":"dinero"},
+    {"id":"vertimientoPct","label":"Vertimiento","base":4.5,"unidades":"%","formato":"num"},
+    {"id":"emisionesCO2","label":"Emisiones","base":0.8,"unidades":"M ton","formato":"num"}
+  ],
+  "cadenas": [
+    {"nombre":"Congestión en transmisión","descripcion":"Restricción ↑ → precio spot zonal ↓ → ingresos ERNC mermados","impacto":"Crítico para proyectos solares/eólicos","polaridad":"negativo"},
+    {"nombre":"Aumento de impuesto verde","descripcion":"Mayor costo para térmicas → EBITDA ↓ → acelera descarbonización","impacto":"Regulatorio","polaridad":"negativo"},
+    {"nombre":"Inversión en baterías","descripcion":"Reduce vertimiento → aprovecha horas de sol/wind → mejora EBITDA","impacto":"Positivo a mediano plazo","polaridad":"positivo"}
+  ],
+  "escenarios": [
+    {"nombre":"Base","palancas":{"precioSpot":80,"disponibilidadTermico":88,"factorHidrologia":75,"factorPlantaERNC":32,"precioGas":6.5,"precioCarbon":110,"coberturaPPA":70,"tipoCambio":900,"capacidadBaterias":15,"restriccionTransmision":12,"impuestoVerde":5,"costoMantenimientoMayor":4.5}},
+    {"nombre":"Crisis Hídrica","palancas":{"precioSpot":110,"disponibilidadTermico":85,"factorHidrologia":40,"factorPlantaERNC":30,"precioGas":8.0,"precioCarbon":130,"coberturaPPA":70,"tipoCambio":920,"capacidadBaterias":10,"restriccionTransmision":18,"impuestoVerde":8,"costoMantenimientoMayor":6}},
+    {"nombre":"Aceleración Renovable","palancas":{"precioSpot":65,"disponibilidadTermico":80,"factorHidrologia":80,"factorPlantaERNC":42,"precioGas":5.5,"precioCarbon":95,"coberturaPPA":80,"tipoCambio":880,"capacidadBaterias":35,"restriccionTransmision":8,"impuestoVerde":12,"costoMantenimientoMayor":3.5}}
+  ],
+  "initState": {"precioSpot":80,"disponibilidadTermico":88,"factorHidrologia":75,"factorPlantaERNC":32,"precioGas":6.5,"precioCarbon":110,"coberturaPPA":70,"tipoCambio":900,"capacidadBaterias":15,"restriccionTransmision":12,"impuestoVerde":5,"costoMantenimientoMayor":4.5},
+  "formulaPrincipal": "function(p,s,ctx){var cap=s.capacidadTotalMW;var h=s.horasAno;var gHidro=cap*s.mixHidro*h*(p.factorHidrologia/100);var gTermico=cap*s.mixTermico*h*(p.disponibilidadTermico/100);var gERNC=cap*s.mixERNC*h*(p.factorPlantaERNC/100);var gTotal=gHidro+gTermico+gERNC;var volPPA=gTotal*(p.coberturaPPA/100);var ingPPA=volPPA*s.precioPPA;var volSpot=gTotal-volPPA;var spotEf=p.precioSpot*(1-p.restriccionTransmision/150);var ingSpot=volSpot*spotEf;var cHidro=gHidro*s.costoMWHidro;var cTerm=gTermico*(p.precioGas*0.8+25+p.precioCarbon*0.02);var cERNC=gERNC*s.costoMWERNC;var costo=cHidro+cTerm+cERNC;var ebitda=(ingPPA+ingSpot-costo)/1_000_000;var bat=p.capacidadBaterias*0.012*500000;var impCO2=gTermico*s.factorEmision*p.impuestoVerde*1000;var mant=p.costoMantenimientoMayor*1_000_000;var ebitdaFinal=(ingPPA+ingSpot-costo+bat-impCO2-mant)/1_000_000;var vert=Math.max(0,8-p.capacidadBaterias*0.18);var emCO2=Math.round(gTermico*s.factorEmision)/1_000;return{ebitda:+ebitdaFinal.toFixed(2),vertimientoPct:+vert.toFixed(1),emisionesCO2:+emCO2.toFixed(2)};}"
+}
